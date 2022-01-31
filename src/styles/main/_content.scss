@@ -1,0 +1,99 @@
+@import "../typography/fonts";
+/* purgecss start ignore */
+*, *:after, *:before {
+    box-sizing: border-box !important;
+}
+html {
+    -webkit-overflow-scrolling: touch;
+    overflow-x: hidden;
+    overflow-y: scroll; 
+    &.sticky {
+        height: 100vh;
+    }
+}
+
+body {
+    position: relative;
+    font-size: $base_font_size - 2px;
+    font-family: $font-primary;
+    background: color(light);
+    font-weight: 300;
+    color: color(black);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: auto;
+    image-rendering: optimizeSpeed;             /*                     */
+    image-rendering: -moz-crisp-edges;          /* Firefox             */
+    image-rendering: -o-crisp-edges;            /* Opera               */
+    image-rendering: -webkit-optimize-contrast; /* Chrome (and Safari) */
+    image-rendering: optimize-contrast;         /* CSS3 Proposed       */
+    -ms-interpolation-mode: nearest-neighbor;   /* IE8+                */
+    fill: color(black);
+    @include breakpoint() {
+        font-size: $base_font_size;
+    }
+}
+*, *:hover, *:focus {
+    -webkit-tap-highlight-color: transparent!important;
+}
+figure {
+    margin: 0;
+}
+a {
+    text-decoration: none;
+    color: color(black);
+    transition: opacity $speed;
+    &:not(.button--rounded) {
+        &:hover {
+            opacity: 0.6;
+        }
+    }
+}
+em {
+    font-family: $font-secondary;
+}
+p, h1, h2, h3, h4, h5, h6, ul, ol {
+    margin: 0;
+    padding: 0;
+}
+ul, ol {
+    list-style-type: none;
+}
+p {
+    line-height: percentage(22/16);
+}
+strong {
+    font-weight: bold;
+}
+img {
+    opacity: 0;
+    &[srcset], &[sizes] {
+        opacity: 1;
+        transition: opacity $speed;
+    }
+}
+
+%list {
+    ul li {
+        line-height: normal;
+        position: relative;
+        padding-left: 22px;
+        & + li {
+            margin-top: $p;
+        }
+        &:before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 7px;
+            width: 13px;
+            border-left: 1px solid #000;
+            border-bottom: 1px solid #000;
+            transform: translateZ(0) rotate(-45deg);
+        }
+    }
+}
+
+/* purgecss end ignore */

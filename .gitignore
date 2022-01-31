@@ -1,0 +1,14 @@
+.idea/
+*.log
+npm-debug.log
+yarn-error.log
+.DS_Store
+build/
+node_modules/
+dist/
+.cache
+.next
+.env
+.now
+Listini (1).xlsx
+pbf-shop.sublime-project

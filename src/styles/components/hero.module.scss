@@ -1,0 +1,23 @@
+.hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 80px;
+    min-height: 100vh;
+    text-align: center;
+    color: color(white);
+    position: relative;
+    //min-height: calc(var(--vh, 1vh) * 100);
+    @media screen and (max-width: 849px) and (orientation: portrait) {
+        min-height: 100vw;
+    }
+    &__{
+        &container {
+            flex: 0 0 auto;
+            max-width: 720px;
+            position: relative;
+            z-index: 1;
+        }
+    }
+}

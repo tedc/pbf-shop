@@ -1,0 +1,263 @@
+.cart {
+    padding-top: 80px;
+    @include breakpoint(lg) {
+        padding-top: 125px;
+    }
+    &__{
+        &summary {
+            padding: 15px;
+            background-color: color(black);
+            color: color(white);
+            .button {
+                border: 1px solid color(white);
+                font-size: 11px;
+                width: $f;
+                margin-top: $p;
+            }
+        }
+        &row, &total {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        &row {
+            padding: $p 0 0;
+            .title + & {
+                margin-top: $p;
+            }
+        }
+        &total {
+            font-size: 12px;
+            padding-top: $p;
+            margin-top: $p;
+            border-top: 1px solid transparentize(color(white), .8);
+            strong {
+                font-size: em(16, 13);
+            }
+        }
+    }
+    .column {
+        &--{
+            &nav {
+                display: flex;
+                align-items: center;
+                .button {
+                    margin-right: $p;
+                }
+                &-arrows {
+                    justify-content: space-between;
+                    padding-top: $p*2;
+                }
+            }
+            
+        }
+    }
+}
+
+.table {
+    width: $f;
+    border: 0;
+    border-collapse: collapse;
+    font-size: 14px;
+    .td {
+        border-top: 1px solid color(black);
+        border-bottom: 1px solid color(black);
+        padding: $p;
+        &--remove {
+            padding-right: 0;
+            text-align: right;
+        }
+    }
+    .remove {
+        position: relative;
+        width: 16px;
+        height: $p;
+        display: inline-block;
+        cursor: pointer;
+        &:before, &:after {
+            width: $f;
+            height: 1px;
+            position: absolute;
+            background-color: color(black);
+            content: '';
+            top: 50%;
+            left: 0;
+            transition: transform $speed;
+            will-change: transform;
+        }
+        &:before {
+             transform: translate3d(-50%, -50%, 0) rotate(45deg);
+        }
+        &:after {
+             transform: translate3d(-50%, -50%, 0) rotate(-45deg);
+        }
+        &:hover {
+            &:before, &:after {
+                transform: translate3d(-50%, -50%, 0);
+                background-color: red;
+            }
+        }
+    }
+}
+
+.mini-cart {
+    position: fixed;
+    right: 15px;
+    top: 15px;
+    width: calc(100% - 30px);
+    max-width: 350px;
+    max-height: calc(100vh - 30px);
+    overflow-x: hidden;
+    overflow-y: auto;
+    p {
+        padding: 40px 0;
+    }
+    /* purgecss start ignore */
+    &-anim {
+        @include cssTransition();
+    }
+    /* purgecss end ignore */
+    &__{
+        &item {
+            padding: 15px 0 $p;
+            margin-bottom: $p;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid transparentize(color(white), .8);
+            img {
+                width: 70px;
+                height: 70px;
+                object-fit: contain;
+                margin-right: $p;
+            }
+            a { 
+                color: color(white); 
+                transition: opacity $speed;
+                display: block;
+                margin-bottom: $p/2;
+                &:hover {
+                    opacity: 0.7;
+                }
+            }
+            .input {
+                margin-bottom: 10px;
+                input {
+                    width: 26px;
+                    color: color(white);
+                    font-size: 12px;
+                }
+                &__{
+                    &mod {
+                        width: 18px;
+                        height: 18px;
+                        border: 1px solid color(white);
+                    }
+                }
+            }
+            .remove {
+                width: 14px;
+                height: 14px;
+                margin-left: 10px;
+                position: relative;
+                cursor: pointer;
+                &:before, &:after {
+                    left: 0;
+                    content: '';
+                    width: $f;
+                    height: 1px;
+                    position: absolute;
+                    top: 50%;
+                    transition: transform $speed;
+                    background-color: color(white);
+                }
+                &:before {
+                    transform: translate3d(0, 0, 0) rotate(45deg);
+                }
+                &:after {
+                    transform: translate3d(0, 0, 0) rotate(-45deg);
+                }
+                &:hover {
+                    &:before, &:after {
+                        transform: translate3d(0, 0, 0);
+                    }
+                }
+            }
+
+        }
+        &content {
+            text-align: left;
+            flex: 2 1 auto;
+        }
+        &close {
+            font-size: 12px;
+            top: 15px;
+            right: 15px;
+            position: absolute;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            @include breakpoint() {
+                top: $p;
+                right: $p;
+            }
+            i {
+                width: 14px;
+                height: 14px;
+                margin-left: 5px;
+                position: relative;
+                &:before, &:after {
+                    left: 0;
+                    content: '';
+                    width: $f;
+                    height: 1px;
+                    position: absolute;
+                    top: 50%;
+                    transition: transform $speed;
+                    background-color: color(white);
+                }
+                &:before {
+                    transform: translate3d(0, 0, 0) rotate(45deg);
+                }
+                &:after {
+                    transform: translate3d(0, 0, 0) rotate(-45deg);
+                }
+                
+            }
+            &:hover {
+                i {
+                    &:before, &:after {
+                        transform: translate3d(0, 0, 0);
+                    }
+                }
+            }
+        }
+        &wrapper {
+            padding: 15px;
+            background-color: color(black);
+            color: color(white);
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            .title {
+                text-align: left;
+            }
+            @include breakpoint() {
+                padding: $p;
+            }
+        }
+    }
+    .button {
+        margin-top: 10px;
+        font-size: 11px;
+        padding: 10px $p;
+        width: $f;
+        max-width: 220px;
+        border: 1px solid color(white);
+        margin: 0 auto;
+    }
+    &:before {
+        content: '';
+        @include full($pos: fixed);
+        background-color: transparentize(color(black), .5);
+    }
+}

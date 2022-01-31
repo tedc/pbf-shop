@@ -1,0 +1,120 @@
+@import "easing";
+$theme-colors: (
+    //secondary: #e4002b,
+    primary: #112a4f,
+    light: #f0eeea,
+    white: #fff,
+    black: #000,
+    gray: #888785
+);
+
+$spacer: 2rem;
+
+// FONTS
+
+$font-primary: 'KSPBF', Helvetica, Arial, sans-serif;
+$font-secondary: 'OGPBF', 'Times New Roman', Times, Georgia, serif;
+
+$base_font_size : 16px;
+
+$font-family : (
+    primary: $font-primary,
+    secondary: $font-secondary
+);
+$font-sizes: (
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    16,
+    18,
+    20,
+    24,
+    30,
+    32,
+    38,
+    48,
+    60,
+    70,
+    80,
+    90,
+    100
+    // 120,
+    // 140
+);
+
+
+
+$margin-bottoms: (
+    20,
+    30,
+    40,
+    60,
+    80,
+    100,
+    140
+);
+
+// Breakpoints ad Units
+$main-sm-columns : 12;
+$gutters: 15px;
+$speed: .5s;
+$speed_2: .75s;
+$p: 20px;
+$f: 100%;
+$window-width: 1366px;
+$lg-width: 920px;
+$max-width: 1110px;
+$max-width-large: 1246px;
+$max-width-xxl: 1550px;
+$ratio: ($max-width-xxl / $window-width);
+$lg-width-xl: $ratio * $lg-width;
+$max-width-large-xl: $ratio * $max-width-large;
+$max-width-xl: $ratio * $max-width;
+
+$letter-spacing: (
+    80,
+    240
+);
+$font-weight: (
+    100,
+    400,
+    500
+);
+$min-max-width: 685px;
+$spacing: (240 / 1000 ) * 1em;
+$spacing_small: (60 / 1000 ) * 1em;
+
+$breakpoints: (
+    xs : 480px,
+    sm : 640px,
+    md : 768,
+    lg : $lg-width + $p*8,
+    mw : $max-width + $p*8,
+    xl : $max-width-large + $p*8,
+    xxl : $max-width-xxl + $p*8
+);
+@import "grid";
+
+@mixin cssTransition() {
+    /* purgecss start ignore */
+    &-{
+        &enter {
+            opacity: 0;
+            &-active {
+                opacity: 1;
+                transition: opacity $speed;
+            }
+        }
+        &exit {
+            opacity: 1;
+            &-active {
+                opacity: 0;
+                transition: opacity $speed;
+            }
+        }
+    }
+    /* purgecss end ignore */
+}

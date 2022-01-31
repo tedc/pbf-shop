@@ -1,0 +1,14 @@
+.account, .register {
+    padding-top: $p*4;
+    @include breakpoint() {
+        padding-top: 125px;   
+    }
+}
+
+.register {
+    .header {
+        text-align: center;
+        flex: 0 0 auto;
+        max-width: $f;
+    }
+}

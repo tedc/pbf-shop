@@ -1,0 +1,1188 @@
+$font_size: $base_font_size;
+$unit: $p;
+
+@function is-number($value) {
+  @return type-of($value) == 'number';
+}
+
+@function is-absolute-length($value) {
+  @return is-number($value) and index('cm' 'mm' 'in' 'px' 'pt' 'pc', unit($value)) != null;
+}
+
+@function rem($px, $base: $font_size) {
+    @if is-absolute-length($px) {
+        @return ($px / $base) * 1rem;
+    } @else {
+        @return ($px + px / $base) * 1rem;
+    }
+}
+
+@function em($px, $base: $font_size) {
+    @if (unitless($px)) {
+    $px: $px * 1px;
+  }
+
+  @if (unitless($base)) {
+    $base: $base * 1px;
+  }
+
+  @return $px / $base * 1em;
+}
+
+@function vw($target, $vp: 1366) {
+    $vw-context: ($vp*.01) * 1px;
+    @return ($target/$vw-context) * 1vw;
+}
+
+@function vh($target, $vp : 768) {
+    @if (unitless($target)) {
+        $target: $target * 1px;
+    }
+    $vw-context: ($vp*.01) * 1px;
+    @return ($target/$vw-context) * 1vh;
+}
+
+@function vmin($target, $vp: 768) {
+    $vw-context: ($vp*.01) * 1px;
+    @return ($target/$vw-context) * 1vmin;
+}
+
+@function mh($v) {
+    @return calc(100vh - #{em($v)});
+}
+
+@mixin clearfix {
+    zoom: 1;
+    &:before,
+    &:after {
+        content: "";
+        display: table;
+    }
+    &:after {
+        clear: both;
+    }
+}
+
+@mixin breakpoint($point: md, $min : true) {
+    $min_or_max: null;
+    $x : null;
+    @if $min {
+        $min_or_max: "min";
+        $x: if(map-has-key($breakpoints, $point),  em(map-get($breakpoints, $point)), em($point));
+    } @else {
+        $min_or_max: "max";
+        $x: if(map-has-key($breakpoints, $point),  em(map-get($breakpoints, $point) - 1px), em($point- 1px));
+    }
+
+    @media (#{$min_or_max}-width: $x) {
+        @content;
+    }
+}
+
+@function color($color) { 
+  @if map-has-key($theme-colors, $color) {
+    @return map-get($theme-colors, $color);
+  }
+
+  @else {
+    @warn "Unfortunately, no value could be retrieved from `#{$color}`. "
+        + "Please make sure it is defined in `$color` map.";
+  }
+}
+
+
+@function easing($ease) { 
+  @if map-has-key($easing, $ease) {
+    @return map-get($easing, $ease);
+  }
+
+  @else {
+    @warn "Unfortunately, no value could be retrieved from `#{$ease}`. "
+        + "Please make sure it is defined in `$ease` map.";
+  }
+}
+
+@mixin normalize_padding {
+    padding: {
+        left: 15px;
+        right: 15px;
+    }
+    @include breakpoint(sm) {
+        padding: {
+            left: em($unit);
+            right: em($unit);
+        }
+    }
+    @include breakpoint(md) {
+        padding: {
+            left: em($unit*2);
+            right: em($unit*2);
+        }
+    }
+}
+
+@mixin normalize_padding_half {
+    padding: {
+        left: 15px;
+        right: 15px;
+    }
+    @include breakpoint(sm) {
+        padding: {
+            left: em($unit);
+            right: em($unit);
+        }
+    }
+}
+
+@mixin normalize_sides {
+    left: 15px;
+    right: 15px;
+    @include breakpoint(sm) {
+        left: em($unit);
+        right: em($unit);
+    }
+    @include breakpoint(md) {
+        left: em($unit*2);
+        right: em($unit*2);
+    }
+}
+
+@mixin full($pos : absolute, $sides : false, $h : $f) {
+    position: $pos;
+    height: $h;
+    top: 0;
+    @if $sides == true {
+        @include normalize_sides;
+    } @else {    
+        width: $f;
+        left: 0;
+    }
+}
+
+@mixin hidden($isHidden : true, $onlyTrans : false) {
+    transition: {
+        property: visibility, opacity;
+        duration: $speed;
+    }
+    @if not $onlyTrans {
+        @if $isHidden {
+            visibility: hidden;
+            opacity: 0;
+        } @else {
+            visibility: visible;
+            opacity: 1;
+            transition-duration: $speed/2;
+        }
+    }
+}
+
+@mixin grid($max : $main-sm-columns) {
+    [class*="--flex"] {
+        display: flex;
+        flex-wrap: wrap;
+        &[class*="-column"] {
+            flex-direction: column;
+        }
+        &[class*="-reverse"] {
+            @include breakpoint() {
+                flex-direction: row-reverse;
+            }
+        }
+        &[class*="-jcsb"] {
+            justify-content: space-between;
+        }
+        // &[class*="-jcfs"] {
+        //     justify-content: flex-start;
+        // }
+        &[class*="-jcfe"] {
+            justify-content: flex-end;
+        }
+        &[class*="-jcc"] {
+            justify-content: center;
+        }
+        &[class*="-jcsa"] {
+            justify-content: space-around;
+        }
+        &[class*="-aifs"] {
+            align-items: flex-start;
+        }
+        &[class*="-aife"] {
+            align-items: flex-end;
+        }
+        &[class*="-aic"] {
+            align-items: center;
+        }
+        // &[class*="-acfs"] {
+        //     align-content: flex-start;
+        // }
+        // &[class*="-acfe"] {
+        //     align-content: flex-end;
+        // }
+        // &[class*="-acc"] {
+        //     align-content: center;
+        // }
+        // &[class*="-acsa"] {
+        //     align-content: space-around;
+        // }
+        // &[class*="-acsb"] {
+        //     align-content: space-between;
+        // }
+        &[class*="-nowrap"] {
+            flex-wrap: nowrap;
+        }
+        &[class*="-gutters"] {
+            // &[class*="-gutters-xs"]{
+            //     margin-left: em($gutters)*-1;
+            //     margin-right: em($gutters)*-1;
+            //     > {
+            //         [class*="__cell"][class*="-xs"], [class*="--cell"][class*="-xs"] {
+            //             padding-left: em($gutters);
+            //             padding-right: em($gutters);
+            //         }
+            //     }
+            // }
+            // @include breakpoint(xs) {
+            //     &[class*="-gutters-xs"]{
+            //         margin-left: em($gutters)*-1;
+            //         margin-right: em($gutters)*-1;
+            //         > {
+            //             [class*="__cell"][class*="-xs"], [class*="--cell"][class*="-xs"] {
+            //                 padding-left: em($gutters);
+            //                 padding-right: em($gutters);
+            //             }
+            //         }
+            //     }
+            // }
+            // @include breakpoint(sm) {
+            //     &[class*="-gutters-sm"]{
+            //         margin-left: em($gutters)*-1;
+            //         margin-right: em($gutters)*-1;
+            //         > {
+            //             [class*="__cell"][class*="-sm"], [class*="--cell"][class*="-sm"] {
+            //                 padding-left: em($gutters);
+            //                 padding-right: em($gutters);
+            //             }
+            //         }
+            //     }
+            // }
+            @include breakpoint() {
+                margin-left: em($gutters)*-1;
+                margin-right: em($gutters)*-1;
+                > {
+                    [class*="--cell"] {
+                        padding-left: em($gutters);
+                        padding-right: em($gutters);
+                    }
+                }
+            }
+            // @include breakpoint(lg) {
+            //     &[class*="-gutters-double"] {
+            //         margin-left: em($gutters)*-2;
+            //         margin-right: em($gutters)*-2;
+            //         > {
+            //             [class*="--cell"] {
+            //                 padding-left: em($gutters)*2!important;
+            //                 padding-right: em($gutters)*2!important;
+            //             }
+            //         }
+            //     }
+            // }
+        }
+    }
+    [class*="--cell"] {
+        flex: 0 0 auto;
+        width: 100%;
+    }
+    // [class*="-asc"] {
+    //     align-self: center;
+    // }
+    [class*="-asfe"] {
+        align-self: flex-end;
+    }
+    // [class*="-asfs"] {
+    //     align-self: flex-start;
+    // }
+
+    @for $i from 3 through 10 {
+        @include breakpoint() {
+            [class*="--cell"] {
+                @if $i == 1 {
+                    &[class*="-s#{$i}"]:not([class*="-s10"]):not([class*="-s11"]):not([class*="-s12"])  {
+                        &:not([class*="-s#{$i}-xs"]):not([class*="-s#{$i}-sm"]):not([class*="-s#{$i}-md"]):not([class*="-s#{$i}-lg"]):not([class*="-s#{$i}-xl"]) {
+                             width: percentage($i/$max);
+                        }
+                    }
+                } @else {
+                    &[class*="-s#{$i}"] {
+                        &:not([class*="-s#{$i}-xs"]):not([class*="-s#{$i}-sm"]):not([class*="-s#{$i}-md"]):not([class*="-s#{$i}-lg"]):not([class*="-s#{$i}-xl"]) {
+                             width: percentage($i/$max);
+                        }
+                    }
+                }
+                
+            }
+        }
+        [class*="--cell"] {
+            @if $i == 1 {
+                &[class*="-s#{$i}-xs"]:not([class*="-s10-xs"]):not([class*="-s11-xs"]):not([class*="-s12-xs"]) {
+                    width: percentage($i/$max);
+                }
+            } @else {
+                &[class*="-s#{$i}-xs"] {
+                    width: percentage($i/$max);
+                }
+            }
+        }
+        // @include breakpoint(xs) {
+        //     [class*="--cell"] {
+        //         @if $i == 1 {
+        //             &[class*="-s#{$i}-xs"]:not([class*="-s10-xs"]):not([class*="-s11-xs"]):not([class*="-s12-xs"]) {
+        //                 width: percentage($i/$max);
+        //             }
+        //         } @else {
+        //             &[class*="-s#{$i}-xs"] {
+        //                 width: percentage($i/$max);
+        //             }
+        //         }
+        //     }
+            
+        // }
+        @include breakpoint(sm) {
+            [class*="--cell"] {
+                @if $i == 1 {
+                    &[class*="-s#{$i}-sm"]:not([class*="-s10-sm"]):not([class*="-s11-sm"]):not([class*="-s12-sm"]) {
+                        width: percentage($i/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$i}-sm"] {
+                        width: percentage($i/$max);
+                    }
+                }
+            }
+            
+        }
+        @include breakpoint() {
+            [class*="--cell"] {
+                @if $i == 1 {
+                    &[class*="-s#{$i}-md"]:not([class*="-s10-md"]):not([class*="-s11-md"]):not([class*="-s12-md"]) {
+                        width: percentage($i/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$i}-md"] {
+                        width: percentage($i/$max);
+                    }
+                }
+            }
+        }
+        @include breakpoint(lg) {
+            [class*="--cell"] {
+                @if $i == 1 {
+                    &[class*="-s#{$i}-lg"]:not([class*="-s10-lg"]):not([class*="-s11-lg"]):not([class*="-s12-lg"]) {
+                        width: percentage($i/$max);
+                    }
+                } 
+                @else {
+                    &[class*="-s#{$i}-lg"] {
+                        width: percentage($i/$max);
+                    }
+                }
+            }
+        }
+
+        @include breakpoint(xl) {
+            [class*="--cell"] {
+                @if $i == 1 {
+                    &[class*="-s#{$i}-xl"]:not([class*="-s10-xl"]):not([class*="-s11-xl"]):not([class*="-s12-xl"]) {
+                        width: percentage($i/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$i}-xl"] {
+                        width: percentage($i/$max);
+                    }
+                }
+            }
+        }
+    }
+    @for $x from 3 through 10 {
+        // @include breakpoint(xs) {
+        //     [class*="--cell"] {
+        //         @if $x == 1 {
+        //             &[class*="-s#{$x}-xs"]:not([class*="-s10-xs"]):not([class*="-s11-xs"]):not([class*="-s12-xs"]) {
+        //                 width: percentage($x/$max);
+        //             }
+        //         } @else {
+        //             &[class*="-s#{$x}-xs"] {
+        //                 width: percentage($x/$max);
+        //             }
+        //         }
+        //     }
+        // }
+        [class*="--cell"] {
+            @if $x == 1 {
+                &[class*="-s#{$x}-xs"]:not([class*="-s10-xs"]):not([class*="-s11-xs"]):not([class*="-s12-xs"]) {
+                    width: percentage($x/$max);
+                }
+            } @else {
+                &[class*="-s#{$x}-xs"] {
+                    width: percentage($x/$max);
+                }
+            }
+        }
+    }
+    @for $c from 3 through 10 {
+        @include breakpoint(sm) {
+            [class*="--cell"] {
+                @if $c == 1 {
+                    &[class*="-s#{$c}-sm"]:not([class*="-s10-sm"]):not([class*="-s11-sm"]):not([class*="-s12-sm"]) {
+                        width: percentage($c/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$c}-sm"] {
+                        width: percentage($c/$max);
+                    }
+                }
+            }
+        }
+    }
+
+    @for $j from 3 through 10 {
+        @include breakpoint() {
+            [class*="--cell"] {
+                @if $j == 1 {
+                    &[class*="-s#{$j}-md"]:not([class*="-s10-md"]):not([class*="-s11-md"]):not([class*="-s12-md"]) {
+                        width: percentage($j/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$j}-md"] {
+                        width: percentage($j/$max);
+                    }
+                }
+            }
+        }
+    }
+    @for $k from 3 through 10 {
+        @include breakpoint(lg) {
+            [class*="--cell"] {
+                @if $k == 1 {
+                    &[class*="-s#{$k}-lg"]:not([class*="-s10-lg"]):not([class*="-s11-lg"]):not([class*="-s12-lg"]) {
+                        width: percentage($k/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$k}-lg"] {
+                        width: percentage($k/$max);
+                    }
+                }
+            }
+        }
+    }
+    @for $y from 3 through 10 {
+        @include breakpoint(xl) {
+            [class*="--cell"] {
+                @if $y == 1 {
+                    &[class*="-s#{$y}-xl"]:not([class*="-s10-xl"]):not([class*="-s11-xl"]):not([class*="-s12-xl"]) {
+                        width: percentage($y/$max);
+                    }
+                } @else {
+                    &[class*="-s#{$y}-xl"] {
+                        width: percentage($y/$max);
+                    }
+                }
+            }
+        }
+    }
+}
+
+@function explode($string,$dem) {
+    $list: ();
+    $sum: str-length($string);
+    @for $i from 1 through $sum {
+        $str: str-index($string, $dem);
+ 
+        @if (str-length($string) >= 1 and $str == null) {
+            $list: append($list, $string);
+            $string: '';
+        }
+ 
+        @if type-of($str) == number {
+            $each: str-slice($string,0,($str - 1));
+            $list: append($list,$each);
+            $string: str-slice($string,($str + 1), $sum);
+        }
+    }
+ 
+    @return $list;
+}
+
+@mixin borders($sides : 'all', $color : $brand-main, $weight : 1px) {
+    @if $sides == 'all' {
+        [class*='--borders'] {
+            border: $weight $color solid;
+        }
+    } @else {
+        $sides: explode($sides, ' ');
+        @each $s in $sides {
+            [class*="--border-#{$s}"] {
+                border-#{$s}: $weight $color solid;
+            }
+        }
+    }
+}
+
+$grows : (
+    small : $unit,
+    half: $unit/2,
+    sml : $unit*1.5,
+    md : $unit*2,
+    sg : $unit*3,
+    lg : $unit*4,
+    xl : $unit*5,
+    hg : $unit*7,
+);
+
+@mixin grow() {
+    $sides : (top, bottom);
+    $sizes : $grows;
+    $not : '';
+    @each $k, $sz in $sizes {
+        $s : if($k == small, '', "-#{$k}");
+        [class*="--grow#{$s}"] {
+            @if $k == small {
+                &:not([class*="--grow-half"]):not([class*="--grow-top"]):not([class*="--grow-bottom"]):not([class*="--grow-sml"]):not([class*="--grow-md"]):not([class*="--grow-sg"]):not([class*="--grow-lg"]):not([class*="--grow-hg"]){
+                     padding: {
+                        top: $sz;
+                        bottom: $sz;
+                    }
+                }
+            } @else if $k == half {
+                padding: {
+                    top: $sz;
+                    bottom: $sz;
+                }
+            } @else {      
+                &:not([class*="--grow#{$s}-top"]):not([class*="--grow#{$s}-bottom"]) {
+                    @if($sz >= $p*2) {
+                        @if($sz >= $p*4) {
+                            padding: {
+                                top: $sz * 0.4;
+                                bottom: $sz * 0.4;
+                            }
+                            @include breakpoint() {
+                                padding: {
+                                    top: $sz;
+                                    bottom: $sz;
+                                }
+                            }
+                        } @else {
+                            padding: {
+                                top: $sz * 0.75;
+                                bottom: $sz * 0.75;
+                            }
+                            @include breakpoint() {
+                                padding: {
+                                    top: $sz;
+                                    bottom: $sz;
+                                }
+                            }
+                        }   
+                    } @else {
+                        padding: {
+                            top: $sz;
+                            bottom: $sz;
+                        }
+                    }
+                }
+            }
+        }   
+        @each $side in $sides {
+            [class*="--grow#{$s}-#{$side}"] {
+                @if $sz >= $p*2  {
+                    @if($sz >= $p*4) {
+                        padding: {
+                            #{$side}: $sz * 0.4;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                #{$side}: $sz;
+                            }
+                        }
+                    } @else {
+                        padding: {
+                            #{$side}: $sz * 0.75;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                #{$side}: $sz;
+                            }
+                        }
+                    }
+                } @else {
+                    @if $sz < $p {
+                        padding: {
+                            #{$side}: $sz;
+                        }
+                    } @else {
+                        padding: {
+                            #{$side}: $sz;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@function strip-unit($number) {
+  @if type-of($number) == 'number' and not unitless($number) {
+    @return $number / ($number * 0 + 1);
+  }
+
+  @return $number;
+}
+
+@mixin grows() {
+    $sides : (top, bottom);
+    $sizes : $grows;
+    $not : '';
+    @each $k, $sz in $sizes {
+        $s : "-#{strip-unit($sz)}";
+        &--grow#{$s} {
+            @if $k == small {
+                padding: {
+                    top: $sz;
+                    bottom: $sz;
+                }
+            } @else if $k == half {
+                padding: {
+                    top: $sz;
+                    bottom: $sz;
+                }
+            } @else {      
+                @if($sz >= $p*2) {
+                    @if($sz >= $p*4) {
+                        padding: {
+                            top: $sz * 0.4;
+                            bottom: $sz * 0.4;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                top: $sz;
+                                bottom: $sz;
+                            }
+                        }
+                    } @else {
+                        padding: {
+                            top: $sz * 0.75;
+                            bottom: $sz * 0.75;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                top: $sz;
+                                bottom: $sz;
+                            }
+                        }
+                    }   
+                } @else {
+                    padding: {
+                        top: $sz;
+                        bottom: $sz;
+                    }
+                }
+            }
+        }   
+        @each $side in $sides {
+            &--grow#{$s}-#{$side} {
+                @if $sz >= $p*2  {
+                    @if($sz >= $p*4) {
+                        padding: {
+                            #{$side}: $sz * 0.4;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                #{$side}: $sz;
+                            }
+                        }
+                    } @else {
+                        padding: {
+                            #{$side}: $sz * 0.75;
+                        }
+                        @include breakpoint() {
+                            padding: {
+                                #{$side}: $sz;
+                            }
+                        }
+                    }
+                } @else {
+                    @if $sz < $p {
+                        padding: {
+                            #{$side}: $sz;
+                        }
+                    } @else {
+                        padding: {
+                            #{$side}: $sz;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@mixin shrink_sides() {
+    &--{
+        &shrink {
+            padding-left: 15px;
+            padding-right: 15px;
+            @include breakpoint(sm) {
+                padding-left: $p;
+                padding-right: $p;
+            }
+            @include breakpoint() {
+                padding-left: $p*2;
+                padding-right: $p*2;
+            }
+            // @include breakpoint(xl) {
+            //     padding: {
+            //         left: calc((100% - #{$max-width-large}) / 2);
+            //         right: calc((100% - #{$max-width-large}) / 2);
+            //     }
+            // }
+            &-{
+                $sides: (right, left);
+                @each $side in $sides {
+                    $other: if($side == right, left, right);
+                    &#{$side} {
+                        padding-#{$side}: 15px;
+                        padding-#{$other}: 0;
+                        @include breakpoint(sm) {
+                            padding-#{$side}: $p;
+                        }
+                        @include breakpoint() {
+                            padding-#{$side}: $p*2;
+                        }
+                        // @include breakpoint(xl) {
+                        //     padding-#{$side}: calc((100% - #{$max-width-large}) / 2);
+                        // }
+                    }
+                    &#{$side}-sm {
+                        @include breakpoint(sm) {
+                            padding-#{$side}: $p;
+                            padding-#{$other}: 0;
+                        }
+                        @include breakpoint() {
+                            padding-#{$side}: $p*2;
+                        }
+                        // @include breakpoint(xl) {
+                        //     padding-#{$side}: calc((100% - #{$max-width-large}) / 2);
+                        // }
+                    }
+                    &#{$side}-md {
+                        @include breakpoint() {
+                            padding-#{$side}: $p*2;
+                            padding-#{$other}: 0;
+                        }
+                        // @include breakpoint(xl) {
+                        //     padding-#{$side}: calc((100% - #{$max-width-large}) / 2);
+                        // }
+                    }
+                    // &#{$side}-xl {
+                    //     @include breakpoint(xl) {
+                    //         padding-#{$other}: 0;
+                    //         padding-#{$side}: calc((100% - #{$max-width-large}) / 2);
+                    //     }
+                    // }
+                }
+            }
+        }
+    }
+}
+
+@mixin shrink($unit: $unit, $percentage: false, $lg: false, $mw : true) {
+    [class*="shrink"] {
+        @include normalize_padding;
+    }
+    [class*="shrink-left-only"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(md) {
+            padding: {
+                left: em($unit*2);
+                right: 0;
+            }
+        }
+    }
+    [class*="shrink-right-only"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(md) {
+            padding: {
+                left: 0;
+                right: em($unit*2);
+            }
+        }
+    }
+    [class*="shrink-double"] {
+        @include breakpoint(xl) {
+            padding: {
+                left: em($unit*4);
+                right: em($unit*4);
+            }
+        }
+    }
+    [class*="shrink-half"] {
+        @include breakpoint(md) {
+            padding: {
+                left: em($unit);
+                right: em($unit);
+            }
+        }
+    }
+    [class*="shrink-right-half"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(md) {
+            padding: {
+                left: 0;
+                right: em($unit);
+            }
+        }
+    }
+    [class*="shrink-left-half"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(md) {
+            padding: {
+                left: em($unit);
+                right: 0;
+            }
+        }
+    }
+    [class*="shrink-right-double"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(xl) {
+            padding: {
+                left: 0;
+                right: em($unit*4);
+            }
+        }
+    }
+    [class*="shrink-left-double"] {
+        padding: {
+            left: 0;
+            right: 0;
+        }
+        @include breakpoint(xl) {
+            padding: {
+                right: 0;
+                left: em($unit*4);
+            }
+        }
+    }
+    [class*="shrink-sg"] {
+        @include breakpoint(xl) {
+            padding: {
+                left: em($unit*3);
+                right: em($unit*3);
+            }
+        }
+    }
+    [class*="shrink-sg-half"] {
+        @include breakpoint(md) {
+            padding: {
+                left: em($unit*1.5);
+                right: em($unit*1.5);
+            }
+        }
+    }
+    @if($percentage) {
+        @if($lg) {
+            [class*="shrink-lg"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        left: percentage(((1366px - $lg-width) / 2) / 1366px);
+                        right: percentage(((1366px - $lg-width) / 2) / 1366px);
+                    }
+                }
+            }
+            [class*="shrink-lg-right"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        left: 0;
+                        right: percentage(((1366px - $lg-width) / 2) / 1366px);
+                    }
+                }
+            }
+            [class*="shrink-lg-left"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        right: 0;
+                        left: percentage(((1366px - $lg-width) / 2) / 1366px);
+                    }
+                }
+            }
+        }
+        @if($mw) {
+            [class*="shrink-mw"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        left: percentage(((1366px - $max-width) / 2) / 1366px);
+                        right: percentage(((1366px - $max-width) / 2) / 1366px);
+                    }
+                }
+            }
+            [class*="shrink-mw-right"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        left: 0;
+                        right: percentage(((1366px - $max-width) / 2) / 1366px);
+                    }
+                }
+            }
+            [class*="shrink-mw-left"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        right: 0;
+                        left: percentage(((1366px - $max-width) / 2) / 1366px);
+                    }
+                }
+            }
+        }
+        [class*="shrink-fw"] {
+            @include breakpoint(xl) {
+                padding: {
+                    left: percentage(((1366px - $max-width-large) / 2) / 1366px);
+                    right: percentage(((1366px - $max-width-large) / 2) / 1366px);
+                }
+            }
+        }
+        [class*="shrink-fw-right"] {
+            @include breakpoint(xl) {
+                padding: {
+                    left: 0;
+                    right: percentage(((1366px - $max-width-large) / 2) / 1366px);
+                }
+            }
+        }
+        [class*="shrink-fw-left"] {
+            @include breakpoint(xl) {
+                padding: {
+                    right: 0;
+                    left: percentage(((1366px - $max-width-large) / 2) / 1366px);
+                }
+            }
+        }
+        @include breakpoint(xxl) {
+            @if($lg) {
+            [class*="shrink-lg"] {
+                padding: {
+                    left: calc((100% - #{$lg-width-xl}) / 2);
+                    right: calc((100% - #{$lg-width-xl}) / 2);
+                }
+            }
+            }
+            [class*="shrink-fw"] {
+                padding: {
+                    left: calc((100% - #{$max-width-large-xl}) / 2);
+                    right: calc((100% - #{$max-width-large-xl}) / 2);
+                }
+            }
+            @if($mw) {
+                [class*="shrink-mw"] {
+                    padding: {
+                        left: calc((100% - #{$max-width-xl}) / 2);
+                        right: calc((100% - #{$max-width-xl}) / 2);
+                    }
+                }
+            }
+            
+            [class*="shrink-fw-right"] {
+                padding: {
+                    left: 0;
+                    right: calc((100% - #{$max-width-large-xl}) / 2);
+                }
+            }
+            @if($mw) {
+                [class*="shrink-mw-right"] {
+                    padding: {
+                        left: 0;
+                        right: calc((100% - #{$max-width-xl}) / 2);
+                    }
+                }
+            }
+            @if($lg) {
+                [class*="shrink-lg-right"] {
+                    padding: {
+                        left: 0;
+                        right: calc((100% - #{$lg-width-xl}) / 2);
+                    }
+                }
+                [class*="shrink-lg-left"] {
+                    padding: {
+                        right: 0;
+                        left: calc((100% - #{$lg-width-xl}) / 2);
+                    }
+                }
+            }
+            @if($mw) {
+                [class*="shrink-mw-left"] {
+                    padding: {
+                        right: calc((100% - #{$max-width-large-xl}) / 2);
+                        left: calc((100% - #{$max-width-xl}) / 2);
+                    }
+                }
+            }
+            [class*="shrink-fw-left"] {
+                padding: {
+                    right: 0;
+                    left: calc((100% - #{$max-width-large-xl}) / 2);
+                }
+            }
+        }
+    } @else {
+        @if($lg) {
+            [class*="shrink-lg"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        left: calc((100% - #{$lg-width}) / 2);
+                        right: calc((100% - #{$lg-width}) / 2);
+                    }
+                }
+            }
+            [class*="shrink-lg-right"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        left: 0;
+                        right: calc((100% - #{$lg-width}) / 2);
+                    }
+                }
+            }
+            [class*="shrink-lg-left"] {
+                @include breakpoint(lg) {
+                    padding: {
+                        right: 0;
+                        left: calc((100% - #{$lg-large}) / 2);
+                    }
+                }
+            }
+        }
+        [class*="shrink-fw"] {
+            @include breakpoint(xl) {
+                padding: {
+                    left: calc((100% - #{$max-width-large}) / 2);
+                    right: calc((100% - #{$max-width-large}) / 2);
+                }
+            }
+        }
+        @if($mw) {
+            [class*="shrink-mw"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        left: calc((100% - #{$max-width}) / 2);
+                        right: calc((100% - #{$max-width}) / 2);
+                    }
+                }
+            }
+        }
+        [class*="shrink-fw-right"] {
+            @include breakpoint(xl) {
+                padding: {
+                    left: 0;
+                    right: calc((100% - #{$max-width-large}) / 2);
+                }
+            }
+        }
+        @if($mw) {
+            [class*="shrink-mw-right"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        left: 0;
+                        right: calc((100% - #{$max-width}) / 2);
+                    }
+                }
+            }
+            [class*="shrink-mw-left"] {
+                @include breakpoint(mw) {
+                    padding: {
+                        right: 0;
+                        left: calc((100% - #{$max-width}) / 2);
+                    }
+                }
+            }
+        }
+        [class*="shrink-fw-left"] {
+            @include breakpoint(xl) {
+                padding: {
+                    right: 0;
+                    left: calc((100% - #{$max-width-large}) / 2);
+                }
+            }
+        }
+    }
+    
+    [class*="shrink-fw-right-double"] {
+        @include breakpoint(xl) {
+            padding: {
+                left: em($p*4);
+            }
+        }
+    }
+    [class*="shrink-fw-left-double"] {
+        @include breakpoint(xl) {
+            padding: {
+                right: em($p*4);
+            }
+        }
+    }
+}
+
+@mixin flex-align {  
+    [class*="-align-start"] {
+        align-content: flex-start;
+        align-items: flex-start;
+        display: flex;
+        > * {
+            width: $f;
+            flex: 0 0 auto;
+        }
+    }
+    [class*="-align-center"] {
+        align-content: center;
+        align-items: center;
+        display: flex;
+        > * {
+            width: $f;
+            flex: 0 0 auto;
+        }
+    }
+    [class*="-align-end"] {
+        align-content: flex-end;
+        align-items: flex-end;
+        display: flex;
+        > * {
+            width: $f;
+            flex: 0 0 auto;
+        }
+    }
+}
+
+@mixin cover($pos: center, $size : cover) {
+    background: {
+        position: $pos;
+        size: $size;
+        repeat: no-repeat;
+    }
+}
+
+@function lh_mb($fz, $lh) { 
+    @return ((em($fz) * ($lh)) - em($fz))*-1;
+}

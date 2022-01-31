@@ -1,0 +1,64 @@
+.title {
+    font-weight: normal;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    @include grows();
+    @each $family in $font-family {
+        $key: nth($family, 1);
+        $value: map-get($font-family, $key);
+        &--font-family-#{$key} {
+            font-family: $value;
+            @if $key == 'secondary' {
+                letter-spacing: normal;
+                text-transform: uppercase;
+            }
+        }
+    }
+    &--upper {
+        text-transform: uppercase;
+    }
+    &--normal {
+        text-transform: none;
+    }
+    @each $size in $font-sizes {
+        @if $size > 10 {
+            &--font-size-#{$size} {
+                @if $size > 14 {
+                    @if $size > 24 {
+                        @if $size < 34 {
+                            font-size: em($size * 0.66, 14px);
+                            @include breakpoint() {
+                                font-size: em($size);
+                            }
+                        } @else if $size >= 34 and $size < 90 {
+                            font-size: em($size / 2, 14px);
+                            @include breakpoint(sm) {
+                                font-size: em($size * 0.66, 14px);
+                            }
+                            @include breakpoint() {
+                                font-size: em($size);
+                            }
+                        } @else if $size >= 90 and $size <= 200  {
+                            font-size: em($size / 3, 14px);
+                            font-size: var(--fz-#{$size});
+                            @include breakpoint(1366) {
+                                font-size: em($size);
+                            }
+                        } 
+                    } @else {
+                        @if $size == 14 {
+                            font-size: 1em;
+                            @include breakpoint() {
+                                font-size: em($size);
+                            }
+                        } @else {
+                            font-size: em($size);
+                        }
+                    }
+                } @else {
+                    font-size: $size + px;
+                }
+            }
+        }
+    }
+}

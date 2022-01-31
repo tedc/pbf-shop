@@ -1,0 +1,89 @@
+.footer {
+    background-color: color(black);
+    color: color(white);
+    .brand {
+        svg {
+            fill: color(white);
+        }
+    }
+    a {
+        display: inline-block;
+        position: relative;
+        color: color(white);
+        transition: opacity $speed;
+        svg {
+            @include full;
+            background-attachment: fixed;
+            perspective: 1000px;
+            transform: translateZ(0);
+        }
+        &:hover {
+            opacity: 0.7;
+        }
+        
+    }
+    .credits {
+        width: 59px;
+        height: 16px;
+    }
+    svg {
+        fill: color(gray);
+    }
+    p {
+        font-size: 10px;
+        text-transform: uppercase;
+        color: color(gray);
+    }
+    .columns {
+        .column:nth-last-child(1) {
+            @include breakpoint(sm) {
+                display: flex;
+                justify-content: flex-end;
+                align-items: flex-start;
+            }
+        }
+        & + .columns {
+            text-align: center;
+            @include breakpoint() {
+                text-align: left;
+                padding-top: $p*4;
+                padding-bottom: $p*2;
+            }
+        }
+    }
+    .column {
+        padding-bottom: $p*2;
+    }
+    .menu {
+        column-count: 2;
+        column-gap: 30px;
+        text-transform: uppercase;
+        font-size: 12px;
+        &__{
+            &item {
+                padding-bottom: 15px;
+                -webkit-column-break-inside: avoid;
+                page-break-inside: avoid;
+                break-inside: avoid;
+            }
+        }
+    }
+}
+
+.social {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    a {
+        position: relative;
+        width: 18px;
+        height: 18px;
+        margin: 0 15px 0 0;
+    }
+    @include breakpoint(md) {
+        justify-content: flex-end;
+        a {
+            margin: 0 0 0 15px;
+        }
+    }
+}

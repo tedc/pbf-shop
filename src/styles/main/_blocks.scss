@@ -1,0 +1,584 @@
+.hero {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-top: 80px;
+    text-align: center;
+    color: color(white);
+    position: relative;
+    min-height: 100vh;
+    @media screen and (max-width: 849px) and (orientation: portrait) {
+        min-height: 100vw;
+    }
+    &__{
+        &container {
+            flex: 0 0 auto;
+            max-width: 720px;
+            position: relative;
+            z-index: 1;
+        }
+    }
+}
+
+.scroller {
+    display: flex;
+    overflow: hidden;
+    &__{
+        &container, &column {
+            flex: 0 0 auto;
+            display: flex;
+        }
+    }
+    .title {
+        flex: 0 0 auto;
+        padding: $p 1em $p 0;
+        border-bottom: 1px solid color(black);
+    }
+}
+
+.figure {
+    &--{
+        &product {
+            margin-top: $p;
+            margin-bottom: $p;
+            position: relative;
+            width: $f;
+            padding-top: percentage(240px/308px);
+            grid-area: figure;
+        }
+    }
+}
+
+.header {
+    @include grows();
+    @include shrink_sides();
+    &--{
+        &products {
+            padding-bottom: 30px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            .title, .button {
+                flex: 0 0 auto;
+            }
+            .button {
+                order: 2;
+            }
+            .countdown {
+                order: 3;
+            }
+            @include breakpoint() {
+                .button {
+                    order: 3;
+                    align-items: center;
+                    margin-right: $p*2;
+                }
+                .title {
+                    width: $f/4;
+                }
+            }
+            
+        }
+        &archive {
+            nav {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                justify-content: space-between;
+            }
+        }
+    }
+}
+
+.nav {
+    @include shrink_sides();
+    @include grows();
+    &--{
+        &bg-black {
+            background-color: color(black);
+            color: color(white);
+        }
+    }
+    &__{
+        &list {
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            width: $f;
+            @include breakpoint(xl) {
+                margin: 0 30px 0 0;
+                width: auto;
+            }
+        }
+        &cat {
+            text-transform: uppercase;
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity $speed;
+            justify-content: space-between;
+            width: $f;
+            margin-top: $p;
+            flex-wrap: wrap;
+            &:hover {
+                opacity: 0.7;
+            }
+            i {
+                width: 8px;
+                height: 8px;
+                margin-left: 10px;
+                position: relative;
+                top: -1px;
+                &:before, &:after {
+                    content: '';
+                    position: absolute;
+                    background-color: color(white);
+                }
+                &:before {
+                    width: $f;
+                    height: 1px;
+                    top: 50%;
+                    transform: translate3d(0, -50%, 0);
+                    left: 0;
+                }
+                &:after {
+                    width: 1px;
+                    top: 0;
+                    height: $f;
+                    left: 50%;
+                    transform: translate3d(-50%, 0, 0);
+                    transition: transform $speed;
+                }
+            }
+            &--active {
+                i {
+                    &:after {
+                        transform: translate3d(-50%, 0, 0) scaleY(0);
+                    }
+                }
+            }
+            > a {
+                color: color(white);
+            }
+            @include breakpoint(xl) {
+                margin-top: 0;
+                margin-right: 0;
+                margin-left: 30px;
+                width: auto;
+            }
+        }
+        &children {
+            display: none;
+            overflow: hidden;
+            width: $f;
+            @include shrink_sides();
+            &--active {
+                display: block;
+            }
+            @include breakpoint(xl) {
+                background-color: color(light);
+            }
+            ul {
+                display: flex;
+                align-items: center;
+                flex-wrap: wrap;
+                padding-top: $p;
+                padding-bottom: $p;
+            }
+            li {
+                @include breakpoint(xl, false) {
+                    width: $f;
+                    & + li {
+                        margin-top: 10px;
+                    }
+                }
+                .nav__cat & {
+                    a { color: color(white)}
+                }
+            }
+        }
+        &link {
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: $f;
+            &:after {
+                width: 12px;
+                position: relative;
+                top: -1px;
+                height: 12px;
+                content: '';
+                margin-left: 10px;
+                border: 1px solid color(white);
+            }
+            &--active {
+                &:after {
+                    background-color: color(white);
+                }
+                
+            }
+            @include breakpoint(lg) {
+                width: auto;
+                margin-right: $p;
+                &:after {
+                    border: 1px solid color(black);
+                }
+                &--active {
+                    &:after {
+                        background-color: color(black);
+                    }
+                    
+                }
+            }
+        }
+        &order {
+            margin-top: $p;
+            width: $f;
+            position: relative;
+            font-size: 10px;
+            cursor: pointer;
+            span {
+                text-transform: uppercase;
+                display: inline-flex;
+                align-items: center;
+                &:after {
+                    content: '';
+                    width: 7px;
+                    display: block;
+                    height: 7px;
+                    border-left: 1px solid color(white);
+                    border-bottom: 1px solid color(white);
+                    margin-left: 10px;
+                    position: relative;
+                    transform: translate3d(0, -50%, 0) rotate(-45deg);
+                }
+            }
+            ul {
+                opacity: 0;
+                visibility: hidden;
+                z-index: 999;
+                position: absolute;
+                top: 200%;
+                left: 50%;
+                background-color: color(black);
+                transform: translate3d(-50%, 0, 0);
+                width: 100%;
+                transition: visibility $speed / 2, opacity $speed / 2;
+                @include breakpoint(xl) {
+                    max-width: 140px;
+                }
+            }
+            &--active {
+                span {
+                    &:after {
+                        transform: translate3d(0, 0%, 0) rotate(-45deg) scale(-1);
+                    }
+                }
+                ul {
+                    opacity: 1;
+                    visibility: visible;
+                    transition: opacity $speed;
+                }
+            }
+            a {
+                color: color(white);
+                transition: opacity $speed;
+                display: block;
+                padding: 10px;
+                border-bottom: 1px solid transparentize(color(white), .7);
+                &:hover {
+                    opacity: 0.6;
+                }
+            }
+            @include breakpoint(xl) {
+                margin-top: 0;
+                width: auto;   
+            }
+        }
+    }
+}
+
+.swiper {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    &-{
+        &wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+        &slide {
+            display: flex;
+            flex-wrap: wrap;
+            flex: 0 0 auto;
+            &-active {
+                z-index: 2;
+            }
+            .column--products-slider & {
+                width: $f / 2;
+                @include breakpoint() {
+                    width: $f / 3;
+                }
+            }
+            .row--shopbycolor & {
+                width: $f/2;
+                @include breakpoint() {
+                    width: $f/4;
+                }
+                @include breakpoint(lg) {
+                    width: $f/6;
+                }
+            }
+        }
+        &button-lock {
+            display: none;
+        }
+    }
+}
+
+.filters {
+    @include shrink_sides();
+    padding-top: 15px;
+    padding-bottom: 30px;
+    border-top: 1px solid color(black);
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    > span {
+        font-size: 12px;
+        font-weight: normal;
+    }
+    > span, .button {
+        margin-top: 15px;
+        margin-right: 20px;
+    }
+}
+
+.item {
+    position: relative;
+    &--{
+        &category {
+            width: $f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            flex: 0 0 auto;
+            min-height: 100vh;
+            color: color(white);
+            padding: $p;
+        }
+    }
+    &__{
+        &content {
+            position: relative;
+            width: $f;
+            flex:  0 0 auto;
+        }
+    }
+    
+}
+
+// PAGINATION
+
+.pagination {
+    @include grows();
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    &__{
+        &link {
+            margin: 0 10px;
+            font-size: 12px;
+            transition: opacity $speed;
+            svg {
+                width: 79px;
+                height: 16px;
+                transition: transform $speed;
+            }
+            &:hover {
+                opacity: 0.5;
+            }
+            &--active {
+                font-weight: bold;
+            }
+        }
+        &prev {
+            svg {
+                transform: translate3d(-5px, 0, 0);
+            }
+        }
+        &next {
+            svg {
+                transform: translate3d(5px, 0, 0);
+            }
+        }
+    }
+}
+
+// QUIZ
+
+.quiz {
+    .swiper-button-prev, .swiper-button-next {
+        position: absolute;
+        bottom: 40px;
+    }
+    .swiper-button-prev {
+        left: 0;
+    }
+    .swiper-button-next {
+        right: 0;
+    }
+    &--{
+        &hidden {
+            display: none;
+        }
+    }
+    &__{
+        &item {
+            width: $f;
+            flex: 0 0 auto;
+            cursor: pointer;
+            transition: opacity $speed;
+            will-change: opacity;
+            padding-bottom: 40px;
+            .title {
+                transition: opacity $speed;
+                will-change: opacity;
+            }
+            &:hover, &--selected {
+                opacity: 0.5;
+            }
+        }
+        &figure {
+            background-color: transparentize(color(black), .8);
+            border-radius: $f;
+            border: 1px solid #000;
+            overflow: hidden;
+            position: relative;
+            margin-bottom: 30px;
+            width: $f;
+            &:before {
+                display: block;
+                content: '';
+                padding-top: $f;
+            }
+            img {
+                border-radius: $f;
+            }
+        }
+    }
+}
+
+.shopbycolor {
+    width: $f;
+    position: relative;
+    &__{
+        &close {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 14px;
+            height: 14px;
+            z-index: 301;
+            cursor: pointer;
+            &:before, &:after {
+                left: 0;
+                content: '';
+                width: $f;
+                height: 1px;
+                position: absolute;
+                top: 50%;
+                transition: transform $speed;
+                background-color: color(black);
+            }
+            &:before {
+                transform: translate3d(0, 0, 0) rotate(45deg);
+            }
+            &:after {
+                transform: translate3d(0, 0, 0) rotate(-45deg);
+            }
+            &:hover {
+                &:before, &:after {
+                    transform: translate3d(0, 0, 0);
+                }
+            }
+        }
+        &product {
+            @include full;
+            background-color: color(light);
+            z-index: 300;
+            @include cssTransition();
+        }
+        &figure {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+            border-right: 1px solid #000;
+            position: relative;
+            &:before {
+                display: block;
+                padding-top: $f;
+                content: '';
+            }
+        }
+        &icon {
+            position: absolute;
+            left: 15px;
+            bottom: 15px;
+            z-index: 200;
+            border-radius: $f;
+            width: 30px;
+            height: 30px;
+            background-color: color(black);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity $speed;
+            &:hover {
+                opacity: 0.6;
+            }
+            svg {
+                fill: color(white);
+                width: 12px;
+                height: 14px;
+            }
+        }
+    }
+}
+
+
+.countdown {
+    padding-top: $p;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    flex: 2 1 auto;
+    @include breakpoint() {
+        order: 2;
+        justify-content: flex-start;
+    }
+    &__{
+        &value {
+            flex: 0 0 auto;
+            font-size: 38px;
+            text-align: center;
+            margin: 0 10px;
+            font-weight: normal;
+            small {
+                display: block;
+                font-size: percentage(11/38);
+            }
+            @include breakpoint() {
+                margin: 0 $p 0 0;
+            }
+        }
+    }
+}

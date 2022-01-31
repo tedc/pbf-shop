@@ -1,0 +1,352 @@
+.brand {
+    position: relative;
+    width: 125px;
+    height: 25px;
+    transition: opacity $speed;
+    display: block;
+    &:hover {
+        opacity: 0.5;
+    }
+    svg {
+        @include full;
+        background-attachment: fixed;
+        perspective: 1000px;
+        transform: translateZ(0);
+    }
+    .checkout & {
+        @include breakpoint() {
+            justify-self: center;
+        }
+    }
+}
+.banner {
+    @include shrink_sides();
+    padding-top: $p;
+    padding-bottom: $p;
+    position: fixed;
+    left: 0;
+    width: $f;
+    z-index: 99999;
+    top: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background-color: color(light);
+    transition: background $speed;
+    @include breakpoint(md, false) {
+        &--open {
+            background-color: color(black)!important;
+            color: color(white);
+            svg {
+                fill: color(white);
+            }
+            a {
+                color: color(white);
+            }
+        }
+
+    }
+    @include breakpoint() {
+        grid-template-columns: 1fr 2fr;
+        .checkout & {
+            grid-template-columns: 1fr 1fr 1fr;
+        }
+    }
+    .checkout & {
+        border-bottom: 1px solid #000;
+        padding-top: $p;
+        padding-bottom: $p;
+    }
+    &--clear {
+        &:not(.banner--inview) {
+            color: color(white);
+            background-color: transparent;
+            svg {
+                fill: color(white);
+            }
+            a {
+                color: color(white);
+            }
+        }
+    }
+    @include breakpoint(lg) {
+        padding-top: $p*2;
+        padding-bottom: $p*2;
+        transition: padding-top $speed, padding-bottom $speed, background $speed;
+        &--inview {
+            padding-top: $p;
+            padding-bottom: $p;
+            background-color: color(light);
+        }
+    }
+    .checkout & {
+        .title {
+            display: none;
+            svg {
+                width: 11px;
+                height: 15px;
+                margin-right: 10px;
+            }
+            @include breakpoint() {  
+                display: inline-flex;
+                align-items: center;
+            }
+        }
+    }
+    &__{
+        &account {
+            &--loading {
+                a {
+                    opacity: 0;
+                }
+            }
+            a:not(.button) {
+                font-size: 11px;
+                text-transform: uppercase;
+                font-weight: bold;
+                display: inline-flex;
+                align-items: center;
+                svg {
+                    position: relative;
+                    top: -2px;
+                    margin-right: 10px;
+                }
+            }
+            
+        }
+        &toggle {
+            justify-self: end;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-weight: normal;
+            i {
+                width: 40px;
+                margin-left: 10px;
+                height: 40px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                &:before, &:after {
+                    height: 2px;
+                    background-color: color(black);
+                    content: '';
+                    transition: transform $speed;
+                    .banner--clear:not(.banner--inview) &, .banner--open & {
+                        background-color: color(white);
+                    }
+                }
+                &:before {
+                    margin-bottom: 5px;
+                }
+                &:after {
+                    margin-top: 5px;
+                }
+            }
+            .banner--open & {
+                i {
+                    &:before {
+                        transform: translate3d(0, 6px, 0) rotate(45deg);
+                    }
+                    &:after {
+                        transform: translate3d(0, -6px, 0) rotate(-45deg);
+                    }
+                }
+                
+            }
+            &:hover {
+                i {
+                    &:before {
+                        transform: translate3d(0, 6px, 0) rotate(0);
+                    }
+                    &:after {
+                        transform: translate3d(0, -6px, 0) rotate(0);
+                    }
+                }
+            }
+            @include breakpoint() {
+                display: none;
+            }
+        }
+        &container {
+            position: absolute;
+            left: 0;
+            top: $f;
+            max-height: calc( 100vh - 80px);
+            padding: $p*2 15px $p*4;
+            visibility: hidden;
+            width: $f;
+            opacity: 0;
+            background-color: color(black);
+            transition: visibility $speed, opacity $speed;
+            .banner--open & {
+                opacity: 1;
+                visibility: visible;
+                transition: visibility $speed, opacity $speed;
+            }
+            @include breakpoint(sm) {
+                padding-left: $p;
+                padding-right: $p;
+            }
+            @include breakpoint() {
+                width: auto;
+                background-color: transparent;
+                visibility: visible!important;
+                opacity: 1!important;
+                transition: none!important;
+                position: static;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                padding: 0;
+            }
+        }
+        &menu {
+            display: none;
+            position: absolute;
+            left: 0;
+            width: $f;
+            top: $f;
+            opacity: 0;
+            visibility: hidden;
+            transition: visibility $speed, opacity $speed;
+            justify-content: space-around;
+            background-color: color(light);
+            border-top: 1px solid #000;
+            .banner--menu-visible & {
+                opacity: 1;
+                visibility: visible;
+                transition: opacity $speed;
+            }
+            @include breakpoint() { 
+                display: flex;
+                padding: $p*2 $p*2;
+            }
+            @include breakpoint(lg) {
+                padding: $p*2 $p*3;
+            }
+            @include breakpoint(xl) {
+                padding: $p*2 $p*4;
+            }
+        }
+        &categories {
+            flex:  1 1 auto;
+            padding: 0 15px;
+            li {
+                padding: 30px 30px 0 0;
+                font-size: 13px;
+            }
+            img {
+                margin-bottom: 20px!important;
+            }
+            a {
+                color: color(black)!important;
+            }
+            @include breakpoint() {
+                max-width: 40%;   
+            }
+        }
+        &list {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            justify-self: center;
+        }
+        &item {
+            padding-bottom: $p;
+            font-size: 18px;
+            width: 100%;
+            &--active {
+                font-weight: bold;
+            }
+            @include breakpoint() {
+                width: auto;
+                padding: 0 15px;
+                font-size: 14px;
+                position: relative;
+                z-index: 2;
+                &--archive {
+                    position: static;
+                    > a {
+                        position: relative;
+                        display: block;
+                        z-index: 2;
+                        &:before {
+                            position: absolute;
+                            width: 120%;
+                            left: -10%;
+                            height: 140px;
+                            top: 50%;
+                            margin-top: -70px;
+                            content: '';
+                        }
+                    }
+                }
+            
+                &:hover {
+                    .banner__menu {
+                        opacity: 1;
+                        visibility: visible;
+                        transition: opacity $speed;
+                    }
+                }
+                
+            }
+        }
+        &tools, &phone {
+            display: flex;
+            align-items: center;
+            justify-self: end;
+            > * {
+                margin-left: 30px;
+            }
+        }
+        &tools {
+            @include breakpoint(md, false) {
+                flex-wrap: wrap;
+                .banner__cart {
+                    width: $f;
+                    margin: 0 0 $p;
+                }
+                .button {
+                    width: $f;
+                    margin: 0;
+                    border: 1px solid color(white);
+                }
+            }
+        }
+        &phone {
+            justify-content: flex-end;
+            svg {
+                width: 15px;
+                height: 22px;
+                margin-right: 5px;
+            }
+            a {
+                display: inline-flex;
+                align-items: center;
+                font-size: 14px;
+                font-weight: bold;
+                transition: opacity $speed;
+                &:hover {
+                    opacity: 0.7;
+                }
+            }
+            @include breakpoint(md, false) {
+                flex-wrap: wrap;
+                a {
+                    width: $f;
+                }
+            }
+        }
+        &cart {
+            font-size: 18px;
+            transition: opacity $speed;
+            &:hover {
+                opacity: 1;
+            }
+            @include breakpoint() {
+                font-size: 14px;
+            }
+        }
+    }
+}

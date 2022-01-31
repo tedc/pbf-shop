@@ -1,0 +1,50 @@
+/* styles/modules/input.module.scss */
+.input {
+    &--{
+        &quantity {
+            display: flex;
+            align-items: center;
+            input[type="number"] {
+                flex: 0 0 auto;
+                width: 36px;
+                appearance: none;
+                background-color: transparent;
+                border: 0;
+                border-radius: 0;
+            }
+        }
+        &__{
+            &mod {
+                border-radius: $f;
+                transition: background-color $speed;
+                text-align: center;
+                flex: 0 0 auto;
+                width: 24px;
+                height: 24px;
+                position: relative;
+                &:before, &:after {
+                    left: 50%;
+                    top: 50%;
+                    background-color: color(white);
+                    position: absolute;
+                }
+                &--{
+                    &minus, &plus {
+                        &:before {
+                            content: '';
+                            width: 7px;
+                            height: 1px;
+                        }
+                    }
+                    &plus {
+                        &:after {
+                            content: '';
+                            width: 1px;
+                            height: 7px;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

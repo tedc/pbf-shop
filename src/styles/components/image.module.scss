@@ -1,0 +1,22 @@
+.image {
+    &--{
+        &fluid {
+            width: $f;
+            height: auto;
+        }
+        &object-fit {
+            &-{
+                &contain {
+                    object-fit: contain;
+                }
+                &cover {
+                    object-fit: cover;
+                }
+            }
+        }
+        &full-size {
+            @include full;
+            z-index: 0;
+        }
+    }
+}
