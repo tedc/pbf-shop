@@ -57,7 +57,7 @@ export default function Filters(props) {
                     <Link href={{
                         pathname: '/prodotti',
                         query: filter.query,
-                    }} key={`${filter.label}-${index}`}>
+                    }} shallow key={`${filter.label}-${index}`}>
                         <a className="button button--bg-black button--rounded button--rounded-filter" dangerouslySetInnerHTML={{__html: `${filter.label}<i></i>`}}></a>
                     </Link>
                 ))

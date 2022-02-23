@@ -278,6 +278,13 @@
             border-top: 1px solid #000;
             overflow: hidden;
             margin: 0 -1px;
+            visibility: visible;
+            transition: opacity $speed;
+            &-loading {
+                transition: visibility $speed, opacity $speed;
+                opacity: 0;
+                visibility: hidden;
+            }
             .column {
                 position: relative;
                 transition: opacity $speed_2;

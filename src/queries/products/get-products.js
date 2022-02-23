@@ -50,7 +50,7 @@ query GET_PRODUCTS_BLOCKS( $salesQuery : RootQueryToProductConnectionWhereArgs )
  `;
 
  export const GET_PRODUCT_ARCHIVE = gql`
- query GET_PRODUCT_ARCHIVE( $uri: String, $query: RootQueryToProductConnectionWhereArgs!  ) {
+ query GET_PRODUCT_ARCHIVE( $uri: String ) {
     
 ${SettingsFragment}
 ${CategoriesFragment}
@@ -61,7 +61,7 @@ ${CategoriesFragment}
             ...SeoFragment
         }
     }
-  products: products(where: $query) {
+  products: products(where:{ typeIn: [SIMPLE,VARIABLE], offsetPagination: {size: ${PER_PAGE_FIRST} } }) {
     edges {
       node {
         ${ProductFragment}

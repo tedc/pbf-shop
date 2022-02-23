@@ -14,11 +14,15 @@ import Tabs from "../../src/components/product/Tabs";
 import Blocks from "../../src/components/product/Blocks";
 import Image from "../../src/image";
 import Seo from '../../src/components/seo';
-import { getSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
+import { useLazyQuery } from '@apollo/client';
 
 export default function Product(props) {
-    const { product, session } = props;
+    const { product, slug } = props;
     const router = useRouter();
+    const { data : session, status } = useSession();
+
+    const [item, setItem ] = useState( product );
 
     // If the page is not yet generated, this will be displayed
     // initially until getStaticProps() finishes running
@@ -92,18 +96,39 @@ export default function Product(props) {
             })
         })
     }
-    console.log( product )
-    const kitProps = {
+
+    const [ kitProps, setKitProps ] = useState( {
         title: 'Kit di lavorazione',
         products: product?.relatedKit?.edges ?? [],
         content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
-    }
-    const relatedProps = {
+    });
+    const [ relatedProps, setRelatedProps  ] = useState( {
         title: 'Ti potrebbero interessare',
         products: product?.related?.edges ?? [],
         content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
-    }
-    console.log( product?.price )
+    } );
+
+    const [ fetchPosts, { loading } ] = useLazyQuery( PRODUCT_BY_SLUG_QUERY, {
+        notifyOnNetworkStatusChange: true,
+        onCompleted: ( data ) => {
+            setItem( data?.product ?? {} );
+            setKitProps( {
+                title: 'Kit di lavorazione',
+                products: data?.product?.relatedKit?.edges ?? [],
+                content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
+            })
+            setRelatedProps({
+                title: 'Ti potrebbero interessare',
+                products: data?.product?.related?.edges ?? [],
+                content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
+            } )
+        },
+        onError: ( error ) => {
+            console.log(error)
+            //setSearchError( error?.graphQLErrors ?? '' );
+        }
+    } );
+    
     return (
         <Layout {...props}>
             <Seo seo={props.seo} uri={props.product.slug} />
@@ -146,8 +171,8 @@ export default function Product(props) {
                                 </>
                                 <Tabs {...{tabs : {firstTab: product.details.firstTab, secondTab: product.details.secondTab, thirdTab: product.details.thirdTab}}} />
                                 <div className="product__meta product__meta--grow-30">
-                                    <Price salesPrice={product?.price} regularPrice={product?.regularPrice}/>
-                                    <AddToCartButton product={ product } input={true} />
+                                    <Price salesPrice={item?.price} regularPrice={item?.regularPrice}/>
+                                    <AddToCartButton product={ item } input={true} />
                                 </div>
                             </div>
                         </div>
@@ -164,18 +189,12 @@ export default function Product(props) {
 };
 
 
-export async function getServerSideProps(context) {
-    const session = await getSession(context);
+export async function getStaticProps(context) {
     const {params: { slug }} = context;
     
     const {data} = await client.query({
         query: PRODUCT_BY_SLUG_QUERY,
         variables: { slug },
-        context: {
-            headers: {
-                'authorization': session?.accessToken ? `Bearer ${session.accessToken}` : '',
-            }
-        },
     })
 
     return {
@@ -185,26 +204,26 @@ export async function getServerSideProps(context) {
             options: data?.optionsPage?.impostazioni,
             seo: data?.product?.seo ?? '',
             categories: data?.categories?.nodes,
-            session: session
+            slug: slug
         },
     };
 }
 
-// export async function getStaticPaths () {
-//     const { data } = await client.query({
-//         query: PRODUCT_SLUGS
-//     })
+export async function getStaticPaths () {
+    const { data } = await client.query({
+        query: PRODUCT_SLUGS
+    })
 
-//     const pathsData = []
+    const pathsData = []
 
-//     data?.products?.nodes && data?.products?.nodes.map((product) => {
-//         if (!isEmpty(product?.slug)) {
-//             pathsData.push({ params: { slug: product?.slug } })
-//         }
-//     })
+    data?.products?.nodes && data?.products?.nodes.map((product) => {
+        if (!isEmpty(product?.slug)) {
+            pathsData.push({ params: { slug: product?.slug } })
+        }
+    })
 
-//     return {
-//         paths: pathsData,
-//         fallback: true
-//     }
-// }
+    return {
+        paths: pathsData,
+        fallback: true
+    }
+}

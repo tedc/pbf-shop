@@ -43,7 +43,7 @@ export default function OrderMenu() {
                         q = {...query, ...q};
                         return (
                             <li key={`${item.label}-${index}`}>
-                                <Link href={{
+                                <Link shallow href={{
                                     pathname: '/prodotti',
                                     query: q,
                                 }}>

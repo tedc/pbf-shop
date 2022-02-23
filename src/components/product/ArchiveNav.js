@@ -97,7 +97,7 @@ const SubNav = (props)=> {
                     <Link href={{
                         pathname: '/prodotti',
                         query: parentQuery,
-                    }} >
+                    }} shallow>
                         <a className={ cx( 'nav__link', {'nav__link--active' : isUndefined(parentQuery[parent]) } ) }>Tutti</a>
                     </Link>
                 </li>
@@ -134,7 +134,7 @@ const SubNav = (props)=> {
                             <li key={item.slug}><Link href={{
                                 pathname: '/prodotti',
                                 query: queryUrl,
-                            }}  key={item.databaseId}>
+                            }} shallow key={item.databaseId}>
                                 <a className={classname} dangerouslySetInnerHTML={{ __html: item.name}}></a>
                             </Link>
                             </li>
@@ -239,7 +239,7 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
                                         <Link href={{
                                             pathname: '/prodotti',
                                             query: q,
-                                        }} >
+                                        }} shallow>
                                             <a dangerouslySetInnerHTML={{__html: category.name}}></a>
                                         </Link>
                                     </li>
