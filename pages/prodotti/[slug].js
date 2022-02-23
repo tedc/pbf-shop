@@ -16,6 +16,7 @@ import Image from "../../src/image";
 import Seo from '../../src/components/seo';
 import { useSession } from 'next-auth/react';
 import { useLazyQuery } from '@apollo/client';
+import { useState } from 'react';
 
 export default function Product(props) {
     const { product, slug } = props;
