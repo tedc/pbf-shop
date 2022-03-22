@@ -21,7 +21,6 @@ import Link from 'next/link';
 
 export default function SingleProduct(props) {
     const { product, slug } = props;
-    console.log( product )
     const router = useRouter();
     const { data : session, status } = useSession();
     const [ role, setRole ] = useState(null);
