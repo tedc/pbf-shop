@@ -25,6 +25,7 @@
     "axios-auth-refresh": "^3.2.1",
     "classnames": "^2.3.1",
     "cookie": "^0.4.1",
+    "cookie-cutter": "^0.2.0",
     "dompurify": "^2.3.3",
     "formidable": "^2.0.1",
     "graphql": "^15.4.0",

@@ -10,13 +10,7 @@ export default function ProductItem({product}) {
         type : 'h2',
         content: product.name,
     }
-    const picture = product?.featuredImage?.node || '';
-    let category;
-    product?.productCategories?.edges.map((cat)=> {
-        if(isNull(cat.node.parentDatabaseId)) {
-            category = <span className="category">{cat.node.name}</span>;
-        }
-    })
+    const picture = product?.image || '';
     return (
         <Link href={product.uri}>
             <a className="product product--item">
@@ -35,6 +29,7 @@ export default function ProductItem({product}) {
                         </figure>
                     ) : ''
                 }
+                { !isNull(product?.categoryName) && <span className="category">{product?.categoryName}</span>}
                 <Title title={title}/>
                 <strong className="price">
                     {

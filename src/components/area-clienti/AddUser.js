@@ -187,8 +187,7 @@ export default function AddUser(props) {
                     <button className="button button--rounded button--bg-black" disabled={disabled()}>Aggiungi</button>
                 </div>
             </div>
-            <Pricelist pricelist={pricelist}/>
-            { !isNull(errorMessage) && <div>{errorMessage}</div>}
+            { errorMessage && <div className="message message--error">{ errorMessage }</div> } 
         </form>
         </>
         </CSSTransition>

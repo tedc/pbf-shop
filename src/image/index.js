@@ -57,17 +57,14 @@ const Image = ( props ) => {
         };
     }
 
-    attributes.onLoad=event => {
-        const target = event.target;
-
-        // next/image use an 1x1 px git as placeholder. We only want the onLoad event on the actual image
-        if (target.src.indexOf('data:image/gif;base64') < 0) {
-            setImageIsLoaded(true)
-        }
+    attributes.onLoadingComplete=event => {
+        setImageIsLoaded(true)
     }
 
     return (
-       <Img {...attributes}/>
+        <div className={cx('image', {'image--loaded': imageIsLoaded})}>
+            <Img {...attributes}/>
+        </div>
     );
 };
 

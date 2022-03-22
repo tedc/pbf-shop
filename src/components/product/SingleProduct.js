@@ -69,7 +69,6 @@ export default function SingleProduct(props) {
                 };
             }
             let base = isNull( cat.parentDatabaseId ) ? cat?.slug : '';
-            console.log( cat.parentDatabaseId )
             if( ! isNull( cat.parentDatabaseId ) ) {
                 cat?.ancestors?.nodes.map((a)=> {
                     if( isNull( a?.ancestors ) ) {
@@ -184,7 +183,7 @@ export default function SingleProduct(props) {
                 <div className="column column--s6-md column--content">
                     <div className="product__content">
                         <Price salesPrice={item?.price} regularPrice={item?.regularPrice} discount={true} />
-                        { mainCategory && <Link href={{pathname:'/product', query: { [mainCategory.slug] : 'all'}}}><a className="product__category" dangerouslySetInnerHTML={{__html: mainCategory.name}}></a></Link> }
+                        { mainCategory && <Link href={{pathname:'/prodotti', query: { [mainCategory.link] : 'all'}}}><a className="product__category" dangerouslySetInnerHTML={{__html: mainCategory.name}}></a></Link> }
                         <Title title={title}/>
                         { product?.sku && <span className="product__sku">Cod: {product?.sku}{ wholesaler && <> / Grossita: <strong dangerouslySetInnerHTML={{__html:wholesaler}}></strong></>}</span>}
                         

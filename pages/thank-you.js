@@ -45,7 +45,6 @@ const ThankYouContent = () => {
                 axios
                     .post('/api/paypal-web-hook', transactionData)
                     .then( res => {
-                        console.log( res )
                         if( res?.data?.success ) {
                             axios.get('/api/get-order', {
                                 params: {

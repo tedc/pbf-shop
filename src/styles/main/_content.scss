@@ -66,9 +66,9 @@ p {
 strong {
     font-weight: bold;
 }
-img {
+.image {
     opacity: 0;
-    &[srcset], &[sizes] {
+    &--loaded {
         opacity: 1;
         transition: opacity $speed;
     }
@@ -95,5 +95,7 @@ img {
         }
     }
 }
-
+#nprogress .bar {
+    z-index: 99999;
+}
 /* purgecss end ignore */

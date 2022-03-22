@@ -3,9 +3,9 @@ import { AppProvider } from "./context/AppContext";
 import Nav from "./Nav";
 import Footer from "./Footer";
 import client from "./ApolloClient";
-import Router from "next/router";
 import { ApolloProvider } from "@apollo/client";
 import { Fonts } from "./commons/Fonts";
+import Banner from "./Banner";
 
 const FontLink = ({font})=> {
     return (
@@ -49,6 +49,7 @@ const Layout = (props) => {
             }
             </>
           </Head>
+          <Banner />
           <Nav {...props}/>
           { props.children }
           <Footer {...props} />

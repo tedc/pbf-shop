@@ -150,7 +150,6 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
             }
         }
         image {
-            id
             altText
             sourceUrl
             mediaDetails {

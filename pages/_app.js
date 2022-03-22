@@ -1,17 +1,16 @@
 // import "../src/styles/style.scss";
 // import "../src/styles/main.scss";
 import "../src/styles/main/app.scss";
-import Router from 'next/router';
-import NProgress from 'nprogress';
+import NextNProgress from "nextjs-progressbar";
 import { SessionProvider } from "next-auth/react"; 
 
-NProgress.configure({ showSpinner: false });
-Router.events.on('routeChangeStart', () => NProgress.start());
-Router.events.on('routeChangeComplete', () => NProgress.done());
-Router.events.on('routeChangeError', () => NProgress.done());
-
 function MyApp({ Component, pageProps, session }) {
-    return <SessionProvider session={session}><Component {...pageProps} /></SessionProvider>
+    return <SessionProvider session={session}><NextNProgress
+  color="#112a4f"
+  height={2}
+  showOnShallow={true}
+  nonce="my-nonce"
+/><Component {...pageProps} /></SessionProvider>
 }
 
 export default MyApp

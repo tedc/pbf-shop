@@ -163,7 +163,7 @@ export default function Customer(props) {
                 </div> }
             </div>
             { isSuccess && !isNull(pricelist) && <div style={{padding: '15px', color: 'white', margin: '20px 0', background: '#68b702', fontWeight: 'bold', textAlign: 'center'}}>Pricelist caricata correttamente</div> }
-            { !isNull(errorMessage) && <div>{errorMessage}</div>}
+            { !isNull(errorMessage) && <div className="message message--error">{ errorMessage }</div> } 
         </form>
         <div className="columns columns--gutters">
             <div className="column column--grow-40 column--s6-xs column--s3-md column--data">

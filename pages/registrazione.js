@@ -50,10 +50,13 @@ export default function Register(props) {
         marketing: false,
     };
 
-    const [input, setInput] = useState(initialState);
+    const [ input, setInput] = useState(initialState);
     const [theBillingStates, setTheBillingStates] = useState([]);
     const [isFetchingBillingStates, setIsFetchingBillingStates] = useState(false);
     const [ isProcessing, setIsProcessing ] = useState( false );
+    const [ isRegisterSent, setIsRegisterSent ] = useState(false);
+    const [ successMessage, setSuccessMessage ] = useState(null);
+    const [errorMessage, setErrorMessage ] = useState(null);
 
     const handleChecks = ( target ) => {
         const newState = { ...input, [target.name]: ! input[target.name], touched: {...input?.touched, [target.name]: true}  };
@@ -82,7 +85,7 @@ export default function Register(props) {
             fields.password = input?.password;
         }
 
-        const { data } = await axios.post('/api/user/register', fields);
+        const { data } = await axios.post('/api/user/new', fields);
 
         const {
             success,
@@ -90,6 +93,7 @@ export default function Register(props) {
             error,
         } = data;
         
+        console.log( data )
         if( success ) {
             if( !isEmpty(input?.password) && input?.role === 'customer' ) {
                 return signIn('credentials', {
@@ -118,7 +122,7 @@ export default function Register(props) {
             if( key !== 'errors' && key !== 'touched' ) {
                 if( key === 'firstName') {
                     fields['first_name'] = value;
-                } else if ( key === lastName) {
+                } else if ( key === 'lastName') {
                     fields['last_name'] = value
                 } else {
                     if(  key !== 'role'  && key !== 'privacy' && key !== 'marketing' ) {
@@ -133,12 +137,23 @@ export default function Register(props) {
 
 
         const { data } = await axios.post('/api/register', fields);
-        setIsProcessing( false );
         const {
             success,
-            data : result,
+            message,
             error
         } = data;
+
+        setIsRegisterSent( success );
+        if( success ) {
+            console.log( message, )
+            setSuccessMessage( message );
+        } else {
+            setErrorMessage( error );
+        }
+        
+        setIsProcessing( false );
+
+        
 
     }
     const handleOnChange = async (event) => {
@@ -157,6 +172,8 @@ export default function Register(props) {
     const handleFormSubmit = async (event) => {
         event.preventDefault();
         setIsProcessing( true );
+        setErrorMessage( null );
+        setSuccessMessage( null );
         if( input?.role === 'customer') {
             await RegisterCustomer();
         } else {
@@ -179,7 +196,7 @@ export default function Register(props) {
     return (
         <Layout {...props}>
             <Seo seo={props.seo} uri="/registrazione/" />
-            <div className="register columns columns--jcc columns--shrink columns--grow-140-bottom">
+            { !isRegisterSent && <div className="register columns columns--jcc columns--shrink columns--grow-140-bottom">
                 <header className="header">
                     <h1 className="title title--font-size-16 title--grow-30-bottom title--font-family-secondary title--normal">
                         Registrazione
@@ -191,13 +208,13 @@ export default function Register(props) {
                 <form className={cx("form form--main form--main-register column column--s10-lg column--grow-40-top", {'form--loading': isProcessing})} noValidate onSubmit={(event) => handleFormSubmit(event)}>
                     <nav className="form__radios" onChange={(event)=> handleOnChange(event)} >
                         <div className="label">
-                            <input type="radio" name="role" value="customer" id="customer" checked={ input?.role === 'customer' } /><label htmlFor="customer" className="label__value label__value--customer"><Costumer width={47} height={55} />Consumatore</label>
+                            <input type="radio" name="role" value="customer" id="customer" checked={ input?.role === 'customer' } onChange={(event)=> setInput({...input, role : event.target.value })} /><label htmlFor="customer" className="label__value label__value--customer"><Costumer width={47} height={55} />Consumatore</label>
                         </div>
                         <div className="label">
-                            <input type="radio" name="role" value="hairdresser" id="hairdresser" checked={ input?.role === 'hairdresser' }  /><label htmlFor="hairdresser" className="label__value label__value--hairdresser"><Hairdresser width={68} height={41}/>Professionista</label>
+                            <input type="radio" name="role" value="hairdresser" id="hairdresser" checked={ input?.role === 'hairdresser' } onChange={(event)=> setInput({...input, role : event.target.value })} /><label htmlFor="hairdresser" className="label__value label__value--hairdresser"><Hairdresser width={68} height={41}/>Professionista</label>
                         </div>
                         <div className="label">
-                            <input type="radio" name="role" value="wholesaler" id="wholesaler" checked={ input?.role === 'wholesaler' }  /><label htmlFor="wholesaler" className="label__value label__value--wholesaler"><Wholesaler width={44} height={44}/>Rivenditore</label>
+                            <input type="radio" name="role" value="wholesaler" id="wholesaler" checked={ input?.role === 'wholesaler' } onChange={(event)=> setInput({...input, role : event.target.value })} /><label htmlFor="wholesaler" className="label__value label__value--wholesaler"><Wholesaler width={44} height={44}/>Rivenditore</label>
                         </div>
                     </nav>
                     <div className="columns columns--gutters">
@@ -261,10 +278,17 @@ export default function Register(props) {
                         <div className="column column--aligncenter">
                             <button className="button button--rounded button--bg-black" disabled={disabled()}>Registrati</button>
                         </div>
-                        
                     </div>
+                    { errorMessage && <div className="message message--error">{ errorMessage }</div> } 
                 </form>
-            </div>
+            </div> }
+            { isRegisterSent && successMessage && <div className="register register--thank-you">
+                <div className="columns columns--grow-140-bottom columns--shrink columns--jcc column--aic" style={{minHeight: '50vh'}}>
+                    <div className="column column--s10-md column--s8-lg">
+                    <p style={{textAlign: 'center', fontSize: `${(24/16)}em`}} dangerouslySetInnerHTML={{__html: successMessage}}></p>
+                    </div>
+                </div>
+            </div>}
         </Layout>
     )
 }

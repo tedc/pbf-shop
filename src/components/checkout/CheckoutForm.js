@@ -231,7 +231,6 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
     };
 
     const disabled = ()=> {
-        console.log(  input?.billing?.touched, input?.shippingDifferentThanShipping )
         if( !input?.shippingDifferentThanShipping ) {
             if( isNull( input?.billing?.touched ) ) {
                 return true;

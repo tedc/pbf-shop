@@ -160,8 +160,8 @@ const ProdutArchive = function(props) {
             <Filters categories={categories} total={page?.offsetPagination?.total} uparams={uparams} />
             { isNull(session) || isUndefined(session) ? ( <><div className={cx("columns", "columns--archive", {'columns--archive-loading': isProductsLoading })}>  
                 {!isEmpty(items) ? items.map((product, index)=> (
-                    <div className="column column--s6-sm column--s4-md column--s3-lg"  key={product.node.databaseId}>
-                        <ProductItem product={product.node} /> 
+                    <div className="column column--s6-sm column--s4-md column--s3-lg"  key={product?.node?.databaseId}>
+                        <ProductItem product={product?.node} /> 
                     </div>
                 ))
                 : (
@@ -172,6 +172,7 @@ const ProdutArchive = function(props) {
                 }
             </div>
             <Pagination pagesCount={pagesCount} postName="prodotti" pageNo={pageNo} />
+            { isProductsLoading && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
             </>) : (
             <>
                 { (isProductsLoading || (status !== 'unauthenticated' && status !== 'authenticated' ) ) && <ContentProductLoader /> }

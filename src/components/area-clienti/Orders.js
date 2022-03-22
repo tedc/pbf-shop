@@ -17,7 +17,6 @@ export default function Orders(props) {
             customerId: session?.user?.databaseId
         },
         onCompleted: ()=> {
-            console.log(data);
             setOrders( data?.orders?.nodes ?? [])
         }
     });

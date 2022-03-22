@@ -78,9 +78,7 @@ const validateAndSanitizeCheckoutForm = ( data, hasStates = true, hasPassword = 
 
 	};
 
-    console.log( hasPassword )
-
-	addErrorAndSanitizedData( 'firstName', 'Nome', 2, 35, 'string', true );
+    addErrorAndSanitizedData( 'firstName', 'Nome', 2, 35, 'string', true );
 	addErrorAndSanitizedData( 'lastName', 'Cognome', 2, 35, 'string', true );
 	addErrorAndSanitizedData( 'company', 'Azienda', 0, 35, 'string', false );
 	addErrorAndSanitizedData( 'country', 'Nazione', 2, 55, 'string', true );

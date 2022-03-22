@@ -17,8 +17,7 @@ import { GET_CUSTOMER_GROUP } from '../../src/queries/users/get-user';
 export default function AreaPage(props) {
     const pageProps = {...props, current: 'dashboard'};
     const { params } = props;
-    console.log( props )
-    const GetLayout = ()=> {
+     const GetLayout = ()=> {
         if( params?.all.indexOf( 'ordini' ) !== -1) {
             return <Orders {...props} />
         } else if( params?.all.indexOf( 'fatturazione' ) !== -1 || params?.all.indexOf( 'spedizione' ) !== -1) {

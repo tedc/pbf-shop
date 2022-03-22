@@ -1,7 +1,8 @@
 import axios from 'axios';
 import {isEmpty} from 'lodash';
+const url = `${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/pbf/v1/register-form`;
+
 export default async function handler( req, res ) {
-    const url = `${process.env.NEXT_PUBLIC_WORDPRESS_SITE_URL}/wp-json/pbf/v1/register-forms`;
     //res.status(200).json({ url: url});
     const responseData = {
         success: false,
@@ -14,6 +15,8 @@ export default async function handler( req, res ) {
         responseData.error = 'Required data not sent';
         return responseData
     }
+
+
     try {
         const {data} = await axios.post(
             url,
@@ -22,8 +25,9 @@ export default async function handler( req, res ) {
         responseData.success = true;
         responseData.message = data.message;
         responseData.redirect = data.redirect;
+        responseData.fields = req?.body
 
-        res.status(200).json(responseData);
+        res.status(200).json(responseData, );
 
     } catch (error) {
         /**
@@ -31,8 +35,8 @@ export default async function handler( req, res ) {
          *
          * @see Data shape expected: https://stackoverflow.com/questions/49349396/create-an-order-with-coupon-lines-in-woocomerce-rest-api
          */
-        
+        responseData.success = false;
         responseData.error = error;
-        res.status(error.response.status).json(responseData);
+        res.status(200).json(responseData);
     }
 }

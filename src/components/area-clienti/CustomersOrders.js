@@ -16,7 +16,6 @@ export default function CustomersOrders(props) {
     useEffect(async ()=> {
         const {data} = await getWholesalerOrders(session)
         setOrders( data );
-        console.log( data )
         setIsLoading( false );
     }, [session])
     return (

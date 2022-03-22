@@ -1,3 +1,11 @@
+const image = `image {
+            altText
+            sourceUrl
+            mediaDetails {
+                height
+                width
+            }
+        }`
 const ProductFragment = `
     id
     name
@@ -7,37 +15,14 @@ const ProductFragment = `
         id
         role
     }
-    productCategories {
-        edges {
-            node {
-                name
-                slug
-                databaseId
-                parentDatabaseId
-            }
-        }
-    }
+    categoryName
     ... on SimpleProduct {  
         sku
         price
         salePrice
         regularPrice
         uri
-        featuredImage {
-            node {
-                altText
-                mediaDetails {
-                    width
-                    height
-                    sizes {
-                        height
-                        width
-                        sourceUrl
-                    }
-                }
-                sourceUrl
-            }
-        }
+        ${image}
     }
     ... on VariableProduct {
         sku
@@ -45,21 +30,7 @@ const ProductFragment = `
         salePrice
         regularPrice
         uri
-        featuredImage {
-            node {
-                altText
-                mediaDetails {
-                    width
-                    height
-                    sizes {
-                        height
-                        width
-                        sourceUrl
-                    }
-                }
-                sourceUrl
-            }
-        }
+        ${image}
     }
 `;
 const ProductsNew = `productsNew: products(where: $newQuery) {

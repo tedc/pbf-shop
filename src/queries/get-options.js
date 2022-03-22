@@ -39,3 +39,16 @@ query GET_MENUS {
         }
     }
 }`;
+
+export const LAST_BANNER = gql`
+query LAST_BANNER {
+  banners(first: 1) {
+    nodes {
+      bannerId
+      content
+      options {
+        background
+      }
+    }
+  }
+}`;
