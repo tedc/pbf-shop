@@ -21,7 +21,7 @@ plugins['@fullhuman/postcss-purgecss'] = {
         './node_modules/swiper/react/*.js',
     ],
     defaultExtractor: content => content.match(/[A-Za-z0-9-_:/]+/g) || [],
-    safelist: ["html", "body", "swiper", /^swiper/, "swiper-wrapper", "img[src]", "img[srcset]", /^swiper-slide/, /^mini-cart-anim/, /^columns--quiz/, /^shopbycolor__product/, /^form--login/, /^button-anim/]
+    safelist: ["html", "body", "swiper", /^swiper/, "swiper-wrapper", "img[src]", "img[srcset]", /^swiper-slide/, /^mini-cart-anim/, /^columns--quiz/, /^shopbycolor__product/, /^form--login/, /^button-anim/, /^image--loaded/]
   }
 
 module.exports = {

@@ -23,9 +23,7 @@ export default function Banner() {
         setIsBannerClose(true);
         console.log( 'click')
     }
-    useEffect(()=> {
-
-    
+    useEffect(()=> {    
         const events = [
             'touchstart',
             'click',
