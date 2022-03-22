@@ -8,7 +8,7 @@ import SingleProduct from '../../src/components/product/SingleProduct';
 export default function Product(props) {
     return (
     <Layout {...props}>
-        <Seo seo={props.seo} uri={props.product.slug} />
+        <Seo seo={props?.seo} uri={props?.product?.slug} />
         { props?.product ? (
             <SingleProduct {...props}/>
         ) : (
