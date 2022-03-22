@@ -68,10 +68,7 @@ strong {
 }
 .image {
     opacity: 0;
-    &--loaded {
-        opacity: 1;
-        transition: opacity $speed;
-    }
+    transition: opacity $speed;
 }
 
 %list {

@@ -62,7 +62,7 @@ const Image = ( props ) => {
     }
 
     return (
-        <div className={cx('image', {'image--loaded': imageIsLoaded})}>
+        <div className={cx('image')} style={ imageIsLoaded ? { opacity : 1} : {}}>
             <Img {...attributes}/>
         </div>
     );
