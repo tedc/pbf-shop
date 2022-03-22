@@ -17,8 +17,12 @@ const SocialIcon = ({service})=> {
 }
 
 const Footer = (props) => {
-    const menus = props.menus?.edges;
+    const menus = props?.menus?.edges;
+    if(!menus) {
+        return '';
+    }
     let menu; 
+    
     menus.map((item)=> {
         const node = item.node;
         if(node?.locations?.indexOf('FOOTER_NAVIGATION') !== -1) {

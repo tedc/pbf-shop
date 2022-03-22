@@ -36,6 +36,7 @@
     "next-iron-session": "^4.2.0",
     "next-seo": "^4.28.1",
     "next-stripe": "^1.0.0-beta.9",
+    "nextjs-progressbar": "^0.0.14",
     "node-fetch": "^2.6.1",
     "nprogress": "^0.2.0",
     "paypal-rest-sdk": "^1.8.1",
