@@ -11,82 +11,34 @@ import Seo from '../../../src/components/seo';
 import { getSession } from 'next-auth/react';
 
 export default function Prodotti(props) {
-    const { products, categories, params, pageInfo, session, query } = props;
-    console.log( props?.where, params, query)
+    const { products, categories, params, pageInfo, pageNo } = props;
     return (
         <Layout {...props}>
             <Seo seo={props.seo} uri={props.uri} />
-            <ProductArchive {...{products, categories, params, query, pageInfo, session}}  />
+            <ProductArchive {...{products, categories, params, pageInfo, pageNo }}  />
         </Layout>
     )
 };
 
-export async function getServerSideProps( context ) {
-    const session = await getSession(context);
+export async function getStaticProps( { params } ) {
 
-    const { query, params } = context;
-
-
-    const offset = getPageOffset( params?.pageNo );
-
-    const where = {
-        orderby : [{
-            field : 'DATE',
-            order: 'DESC',
-        }],
-        typeIn: [
-            'SIMPLE',
-            'VARIABLE'
-        ],
-        offsetPagination: { 
-            size: PER_PAGE_FIRST,
-            offset: offset
-        }
-    }
-
-
-    if( !isEmpty(query, true) && !isUndefined(query) ) {
-        Object.entries(query).map(([key, value])=> {
-            if( key !== 'order' && key !== 'pageNo' && key !== 'search') {
-                if(isUndefined(where.taxonomyFilter)) {
-                    where.taxonomyFilter = {
-                        filters : [],
-                        relation : 'OR',
-                    }
-                }
-                where.taxonomyFilter.filters.push({
-                    taxonomy: 'PRODUCTCATEGORY',
-                    terms: value === 'all' ? key : value.split(','),
-                })
-            } else {
-                if( key === 'order') {
-                    where.orderby = orders[value].fields;
-                } else if ( key === 'search') {
-                    where.search = value;
-                }
-            }
-        })
-    }
+    const { pageNo } = params || {};
+    const offset = getPageOffset( pageNo );
 
     const {data} = await client.query({
         query: GET_PRODUCT_ARCHIVE,
         variables: { 
             uri : '/prodotti', 
-            query: where
+            offset: offset
         },
-        context: {
-            headers: {
-                'authorization': session?.accessToken ? `Bearer ${session.accessToken}` : '',
-            }
+    });
+    const queryParams = [];
+
+    data?.categories?.nodes && data?.categories?.nodes.map((category) => {
+        if (!isEmpty(category?.slug)) {
+            queryParams.push( category?.slug );
         }
     });
-    // const queryParams = [];
-
-    // data?.categories?.nodes && data?.categories?.nodes.map((category) => {
-    //     if (!isEmpty(category?.slug)) {
-    //         queryParams.push( category?.slug );
-    //     }
-    // });
 
     return {
         props: {
@@ -97,10 +49,30 @@ export async function getServerSideProps( context ) {
             pageInfo: data?.products?.pageInfo,
             menus : data?.menus,
             options : data?.optionsPage?.impostazioni,
-            session : session,
-            query: query ?? null,
-            where: where,
-            params: params ?? null
+            params: queryParams ?? null,
+            statiParams: params,
+            pageNo
         },
     }
 };
+
+
+
+export async function getStaticPaths() {
+    const { data } = await client.query( {
+        query: GET_TOTAL_PRODUCTS_COUNT,
+    } );
+    const totalPostsCount = data?.productsCount?.pageInfo?.offsetPagination?.total ?? 0;
+    //* since the first page posts and other page posts will be different, we subtract the no of posts we'll show on first page and then divide the result with the no of posts we'll show on other pages and then will add 1 for the first page that we subtracted.
+    const pagesCount = Math.ceil( ( totalPostsCount - PER_PAGE_FIRST ) / PER_PAGE_REST + 1 );
+    const paths = new Array( pagesCount ).fill( '' ).map( ( _, index ) => ( {
+        params: {
+            pageNo: ( index + 1 ).toString(),
+        },
+    } ) );
+
+    return {
+        paths: [ ...paths ],
+        fallback: false,
+    };
+}

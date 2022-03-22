@@ -15,8 +15,11 @@ const createUserObject = (response, children)=> {
         refreshToken: response?.user?.jwtRefreshToken,
         jwt_secret: response?.user?.jwtUserSecret,
         nicename: response?.user?.nicename,
-        customer: response?.customer,
         roles: response?.user?.roles,
+        parent: response?.user?.connection?.wholesalerParent?.databaseId,
+        parentName : response?.customer?.wholesalerParentName,
+        billing: response?.customer?.billing,
+        shipping: response?.customer?.shipping
     };
 }
 

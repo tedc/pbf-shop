@@ -17,7 +17,7 @@ export const middleware = new ApolloLink( async ( operation, forward ) => {
 
         operation.setContext( ( { headers = {} } ) => {
             return ( {
-                    headers: {
+                headers: {
                         ...headers,
                         "woocommerce-session": `Session ${ session }`,
                         'authorization': usession?.accessToken ? `Bearer ${usession.accessToken}` : '',

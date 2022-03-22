@@ -66,7 +66,8 @@ export async function getServerSideProps ( context ) {
             session: session,
             group: children?.data?.customers?.nodes ?? [],
             params: params,
-            tutorial: data?.tutorial
+            tutorial: data?.tutorial,
+            user: children?.data?.customer,
         },
     }
 

@@ -12,9 +12,10 @@ import { useMutation, useQuery } from '@apollo/client';
 import { getFormattedCart, getUpdatedItems } from "../../functions";
 import { CSSTransition } from 'react-transition-group';
 import { useSession } from 'next-auth/react';
+import { SpinnerDotted } from 'spinners-react'; 
 
 const CartIcon = () => {
-	const { cart, setCart, showInCart, setShowInCart } = useContext( AppContext );
+	const { cart, setCart, showInCart, setShowInCart, cartLoading, setCartLoading, setMenuVisibility } = useContext( AppContext );
     const [ isCartLoading, setIsCartLoading ] = useState( false );
     const {data: session } = useSession();
     
@@ -25,6 +26,7 @@ const CartIcon = () => {
         if(matchMin.matches) {
             event.preventDefault();
             setShowInCart(true);
+            setMenuVisibility( true );
         }
         
     }
@@ -42,6 +44,7 @@ const CartIcon = () => {
 
             // Update cart data in React Context.
             setCart(updatedCart);
+            setCartLoading( false );
         }
     });
     const [updateCart, { data: updateCartResponse, loading: updateCartProcessing, error: updateCartError }] = useMutation( UPDATE_CART, {
@@ -51,22 +54,15 @@ const CartIcon = () => {
             }
         },
         onCompleted: () => {
-            console.log( 'UPDATE_CART' )
             refetch();
         },
-        // onError: ( error ) => {
-        //     if ( error ) {
-        //         const errorMessage = error?.graphQLErrors?.[ 0 ]?.message ? error.graphQLErrors[ 0 ].message : '';
-        //         setRequestError( errorMessage );
-        //     }
-        // }
     } );
 
     const handleRemoveProductClick = ( event, cartKey, products ) => {
 
         event.stopPropagation();
         if ( products.length ) {
-
+            setCartLoading( true );
             // By passing the newQty to 0 in updateCart Mutation, it will remove the item.
             const newQty = 0;
             const updatedItems = getUpdatedItems( products, newQty, cartKey );
@@ -81,6 +77,10 @@ const CartIcon = () => {
             } );
         }
     };
+
+    // useEffect(()=> {
+    //     refetch();
+    // }, [ showInCart ])
 
 	return (
         <div className="banner__cart">
@@ -99,7 +99,7 @@ const CartIcon = () => {
                 {/*{ totalPrice ? <span> { totalPrice }</span> : '' }*/}
             </a>
             <CSSTransition in={showInCart} timeout={300} classNames="mini-cart-anim" unmountOnExit>
-                <div className="mini-cart" onClick={() => setShowInCart(false)}>
+                <div className={cx("mini-cart", {"mini-cart--loading" : cartLoading})} onClick={() => {setShowInCart(false);setMenuVisibility(false)}}>
                     <div className="mini-cart__wrapper">
                         <div className="mini-cart__close">Chiudi<i></i></div>
                         <h4 className="title title--font-size-12">Bag
@@ -130,6 +130,7 @@ const CartIcon = () => {
                                 </a>
                             </Link></>}
                     </div>
+                    { cartLoading && <SpinnerDotted style={{ color: 'white', position: 'absolute', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 2}} /> }
                 </div>
             </CSSTransition>
         </div>

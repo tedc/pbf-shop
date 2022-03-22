@@ -4,26 +4,23 @@ import {createPaginationLinks, PER_PAGE_FIRST, getPageOffset, PER_PAGE_REST, tot
 import cx from 'classnames';
 import Previous from './previous';
 import Next from './next';
+import { useRouter } from 'next/router';
+import { productsUrlParams } from '../../../utils/product';
 
-const Pagination = ( {postName, params, pageInfo, query} ) => {
+const Pagination = ( {postName, pagesCount, pageNo } ) => {
     if ( ! postName ) {
         return null;
     }
-
-
-    const totalProductsCount = pageInfo?.offsetPagination?.total ?? 0;
-    const pagesCount = Math.ceil( ( totalProductsCount - PER_PAGE_FIRST ) / PER_PAGE_REST + 1 );
-
-    const currentPageNo = parseInt( params?.pageNo ) || 1;
-
+    const router = useRouter();
+    const query = productsUrlParams(router);
+    const currentPageNo = parseInt( pageNo ) || 1;
     const paginationLinks = createPaginationLinks( currentPageNo, pagesCount );
-
     return (
         <>
         {  paginationLinks.length > 1 ? (
         <div className="pagination pagination--grow-40-top pagination--grow-80-bottom">
 
-            <Previous currentPageNo={currentPageNo} postName={postName}/>
+            <Previous currentPageNo={currentPageNo} postName={postName} query={query}/>
 
             {paginationLinks.map( ( pageNo, index ) => {
                 const paginationLink = pageNo === 1 ? `/${postName}`: `/${postName}/page/[pageNo]`;
@@ -31,10 +28,7 @@ const Pagination = ( {postName, params, pageInfo, query} ) => {
                 if(pageNo === 1) delete q.pageNo;
                 return (
                     'number' === typeof pageNo ? (
-                        <Link key={`id-${index}`} href={{
-                                pathname: paginationLink,
-                                query: q,
-                              }}>
+                        <Link key={`id-${index}`} href={{ pathname: paginationLink, query: q }}>
                             <a
                                 className={cx( 'pagination__link', {
                                     'pagination__link--active': pageNo === currentPageNo
@@ -49,7 +43,7 @@ const Pagination = ( {postName, params, pageInfo, query} ) => {
                     )
                 );
             } )}
-            <Next currentPageNo={currentPageNo} pagesCount={pagesCount} postName={postName}/>
+            <Next currentPageNo={currentPageNo} pagesCount={pagesCount} postName={postName} query={query} />
         </div>
         ) : '' }
         </>

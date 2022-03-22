@@ -61,7 +61,7 @@ const validateAndSanitizeCheckoutForm = ( data, hasStates = true, hasPassword = 
 		}
 
 
-        if( 'passwordConfirm' === type && data[ fieldName] !== data.password ) {
+        if( 'passwordConfirm' === type && data[ fieldName] !== data.password  && hasPassword ) {
             errors[ fieldName ] = `${errorContent} non corrisponde alla password`;
         }
 
@@ -78,6 +78,8 @@ const validateAndSanitizeCheckoutForm = ( data, hasStates = true, hasPassword = 
 
 	};
 
+    console.log( hasPassword )
+
 	addErrorAndSanitizedData( 'firstName', 'Nome', 2, 35, 'string', true );
 	addErrorAndSanitizedData( 'lastName', 'Cognome', 2, 35, 'string', true );
 	addErrorAndSanitizedData( 'company', 'Azienda', 0, 35, 'string', false );
@@ -89,8 +91,8 @@ const validateAndSanitizeCheckoutForm = ( data, hasStates = true, hasPassword = 
 	addErrorAndSanitizedData( 'postcode', 'CAP', 2, 10, 'postcode', true );
 	addErrorAndSanitizedData( 'phone', 'Numero di telefono', 10, 15, 'phone', true );
 	addErrorAndSanitizedData( 'email', 'Email', 11, 254, 'email', true );
-    addErrorAndSanitizedData( 'password', 'Password', 6, 254, 'string', hasPassword );
-    addErrorAndSanitizedData( 'passwordConfirm', 'La conferma', 6, 254, 'passwordConfirm', hasPassword );
+    addErrorAndSanitizedData( 'password', 'Password', 0, 254, 'string', hasPassword );
+    addErrorAndSanitizedData( 'passwordConfirm', 'La conferma', 0, 254, 'passwordConfirm', hasPassword );
 
 	// The data.createAccount is a boolean value.
 	sanitizedData.createAccount = data.createAccount;

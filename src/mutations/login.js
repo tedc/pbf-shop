@@ -21,6 +21,11 @@ mutation LOGIN ( $input: LoginInput!) {
             jwtRefreshToken
             jwtAuthToken
             nicename
+            connection {
+                wholesalerParent {
+                    databaseId
+                }
+            }
             roles {
                 nodes {
                     displayName
@@ -29,7 +34,34 @@ mutation LOGIN ( $input: LoginInput!) {
             }
         }
         customer {
-            ${UserFragment}
+            wholesalerParentName
+            billing {
+                address1
+                address2
+                city
+                company
+                country
+                email
+                lastName
+                firstName
+                phone
+                postcode
+                vat
+                state
+            }
+            shipping {
+                address1
+                address2
+                city
+                company
+                country
+                email
+                lastName
+                firstName
+                phone
+                postcode
+                state
+            }
         }
     }
 }

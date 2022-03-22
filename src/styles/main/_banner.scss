@@ -94,11 +94,12 @@
     }
     &__{
         &account {
-            &--loading {
-                a {
-                    opacity: 0;
-                }
-            }
+            position: relative;
+            // &--loading {
+            //     // a {
+            //     //     opacity: 0;
+            //     // }
+            // }
             a:not(.button) {
                 font-size: 11px;
                 text-transform: uppercase;
@@ -119,10 +120,11 @@
             align-items: center;
             cursor: pointer;
             font-weight: normal;
+            font-size: 14px;
             i {
-                width: 40px;
+                width: 20px;
                 margin-left: 10px;
-                height: 40px;
+                height: 20px;
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
@@ -136,19 +138,19 @@
                     }
                 }
                 &:before {
-                    margin-bottom: 5px;
+                    margin-bottom: 2px;
                 }
                 &:after {
-                    margin-top: 5px;
+                    margin-top: 2px;
                 }
             }
             .banner--open & {
                 i {
                     &:before {
-                        transform: translate3d(0, 6px, 0) rotate(45deg);
+                        transform: translate3d(0, 3px, 0) rotate(45deg);
                     }
                     &:after {
-                        transform: translate3d(0, -6px, 0) rotate(-45deg);
+                        transform: translate3d(0, -3px, 0) rotate(-45deg);
                     }
                 }
                 
@@ -206,19 +208,20 @@
             width: $f;
             top: $f;
             opacity: 0;
-            visibility: hidden;
-            transition: visibility $speed, opacity $speed;
+            pointer-events: none;
+            transition: opacity $speed/3;
             justify-content: space-around;
             background-color: color(light);
             border-top: 1px solid #000;
             .banner--menu-visible & {
                 opacity: 1;
-                visibility: visible;
                 transition: opacity $speed;
+                pointer-events: auto;
             }
             @include breakpoint() { 
                 display: flex;
                 padding: $p*2 $p*2;
+                border-bottom: 1px solid #000;
             }
             @include breakpoint(lg) {
                 padding: $p*2 $p*3;
@@ -253,10 +256,12 @@
         }
         &item {
             padding-bottom: $p;
-            font-size: 18px;
+            font-size: 24px;
             width: 100%;
             &--active {
-                font-weight: bold;
+                > a {
+                    font-weight: bold;
+                }
             }
             @include breakpoint() {
                 width: auto;
@@ -296,9 +301,12 @@
             display: flex;
             align-items: center;
             justify-self: end;
-            > * {
-                margin-left: 30px;
+            @include breakpoint() {
+                > * {
+                    margin-left: 30px;
+                }
             }
+            
         }
         &tools {
             @include breakpoint(md, false) {
@@ -339,13 +347,15 @@
             }
         }
         &cart {
-            font-size: 18px;
+            font-size: 14px;
+            z-index: 2;
             transition: opacity $speed;
+            margin-top: 30px;
             &:hover {
                 opacity: 1;
             }
             @include breakpoint() {
-                font-size: 14px;
+                margin-top: 0;
             }
         }
     }

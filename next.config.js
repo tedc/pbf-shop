@@ -27,7 +27,11 @@ module.exports = {
         domains: [ allowedImageWordPressDomain, 'via.placeholder.com' ],
     },
     generateBuildId: async () => {
-        // You can, for example, get the latest git commit hash here
+    // You can, for example, get the latest git commit hash here
         return 'pbf'
-      },
+    },
+    compiler: {
+    // ssr and displayName are configured by default
+        styledComponents: true,
+    },
 };

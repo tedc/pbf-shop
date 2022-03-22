@@ -1,5 +1,5 @@
 import validateAndSanitizeCheckoutForm from '../../validator/checkout';
-import { createUserInputData } from '../../utils/user';
+import { createUserInputData, TableStyles, pricelistLayouts } from '../../utils/user';
 import { setStatesForCountry } from "../../utils/checkout";
 import { isEmpty, isNull } from 'lodash';
 import { useState, useEffect, useContext } from 'react';
@@ -10,6 +10,9 @@ import { AppContext } from "../context/AppContext";
 import { SpinnerDotted } from 'spinners-react'; 
 import { useRouter } from 'next/router';
 import { CSSTransition } from 'react-transition-group';
+import { Dropzone } from '@dropzone-ui/react';
+import Pricelist from './Pricelist';
+import PricelistInfo from './PricelistInfo';
 
 const initialState = {
     roles: ['hairdresser'],
@@ -32,7 +35,7 @@ const initialState = {
 };
 
 export default function AddUser(props) {
-    const { billingCountries } = props?.countries?.wooCountries || {};
+    const { billingCountries } = props?.countries || {};
     
     const router = useRouter();
 
@@ -43,16 +46,16 @@ export default function AddUser(props) {
     const [ isProcessing, setIsProcessing ] = useState( false );
     const [ isUserAdded, setIsUserAdded ] = useState( false ); 
     const [ user, setUser ] = useState( null );
+    const [ files, setFiles ] = useState( [] );
+    const [ pricelist, setPricelist ] = useState( null );
+    const [ errorMessage, setErrorMessage ] = useState(null);
+    const [ isInfoOpen, setIsInfoOpen ] = useState(false);
     
     const handleOnChange = async (event) => {
         const {target} = event || {};
-
-
-        const billingValidationResult = validateAndSanitizeCheckoutForm(input?.billing, theBillingStates?.length);
-
-        const newState = {...input, billing : { ...input.billing, [target.name]: target.value, errors: billingValidationResult.errors, touched: {...input?.touched, [target.name]: true} }};  
-        setInput(newState); 
-        
+        const billingValidationResult = validateAndSanitizeCheckoutForm( {...input?.billing, [target.name]: target.value}, theBillingStates?.length);
+        const newState = {...input, billing: {...input?.billing, [target.name]: target.value, errors: billingValidationResult.errors, touched: {...input?.billing?.touched, [target.name]: true}}};  
+        setInput(newState);
         const states = setTheBillingStates,
             fetching = setIsFetchingBillingStates;
         await setStatesForCountry(target, states, fetching);
@@ -70,9 +73,12 @@ export default function AddUser(props) {
             lastName: inputData?.lastName,
             username: inputData?.email,
             roles: input?.roles,
-            parent: props?.session?.user?.databaseId
+            parent: props?.user?.databaseId
         }
 
+        if( !isNull(pricelist) ) {
+            fields.pricelist = pricelist;
+        }
 
         const { data } = await axios.post('/api/user/register', fields);
         const session = await axios.get('/api/auth/session?update');
@@ -82,20 +88,38 @@ export default function AddUser(props) {
             data : result,
             error
         } = data;
-
-        setIsUserAdded( success );
         if( ! success ) {
-
+            setErrorMessage( data?.error?.message )
         } else {
             setUser( result?.createCustomer?.customer );
+            setIsUserAdded( success );
         }
 
+    }
 
-        console.log( fields, props?.session?.user?.databaseId, success, result, error?.message )
+    const handleFileInput = (files) => {
+        setIsProcessing(true)
+        setFiles(files)
+    }
+
+    const clearFiles = ()=> {
+        setFiles([]);
+        setPricelist(null);
     }
 
     const disabled = ()=> {
-        
+        if( isProcessing ) {
+            return true;
+        }
+        if( isNull( input?.billing?.touched ) ) {
+            return true;
+        }
+        const cond = Object.keys( input?.billing?.touched ).length >= 8;
+        if( cond ) {
+            return Object.keys( input?.billing?.errors ).length > 0;
+        } else {
+            return true;
+        }
     }
 
     useEffect(()=> {
@@ -110,7 +134,7 @@ export default function AddUser(props) {
         <form className={cx('form form--main column column--s10-lg', {'form--loading':isProcessing})} noValidate onSubmit={(event) => handleFormSubmit(event)}>
             <div className="columns columns--gutters">
                 <Address
-                    states={ theBillingStates }
+                    states={theBillingStates}
                     countries={billingCountries}
                     input={input?.billing }
                     handleOnChange={(event) => handleOnChange(event, false, true)}
@@ -120,14 +144,55 @@ export default function AddUser(props) {
                     isBillingOrShipping
                     isRegister={false}
                 />
+                <div className="column column--input column--relative column--grow-30-bottom">
+                    <label className="upload" htmlFor="pricelist">
+                        <span className="upload__content">
+                            Carica il listino prezzi
+                            { !isEmpty(files) && <span style={{fontSize:11}}><br/>{files[0].file?.name}</span>}
+                        </span>
+                        <i className="upload__info" onClick={()=> setIsInfoOpen(true)}>?</i>
+                        <i className="upload__btn"></i>
+                        {  !isEmpty(files) && <i className="upload__clear" onClick={()=> clearFiles()}></i> }
+                        <Dropzone
+                            header={true}
+                            footer={false}
+                            accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel"
+                            style={{
+                                position: 'absolute',
+                                width: '100%',
+                                height: '100%',
+                                top: 0,
+                                left: 0,
+                                opacity: 0,
+                            }}
+                            minHeight="100%"
+                            maxHeight="100%"
+                            maxFiles={1}
+                            localization='IT-it'
+                            url="/api/user/upload"
+                            value={files}
+                            onUploadStart={handleFileInput}
+                            uploadOnDrop={true}
+                            onUploadFinish={(res)=> {
+                                if( res[0].serverResponse?.status ) {
+                                    setPricelist( res[0].serverResponse?.sheet );
+                                    setIsProcessing(false);
+                                }
+                            }}
+                            behaviour="replace"
+                      ></Dropzone>
+                    </label>
+                </div>
                 <div className="column column--aligncenter">
-                    <button className="button button--rounded button--bg-black" >Aggiungi</button>
+                    <button className="button button--rounded button--bg-black" disabled={disabled()}>Aggiungi</button>
                 </div>
             </div>
+            <Pricelist pricelist={pricelist}/>
+            { !isNull(errorMessage) && <div>{errorMessage}</div>}
         </form>
         </>
         </CSSTransition>
-        <CSSTransition in={ isUserAdded } timeout={750} classNames="fade-in" unmountOnExit>
+        <CSSTransition in={ isUserAdded && !isNull( user ) } timeout={750} classNames="fade-in" unmountOnExit>
         <div className="user">
             <h2 className="title title--grow-40-bottom title--font-size-24">Hai aggiunto un utente<div className="title__check"></div></h2>
             <p>
@@ -138,6 +203,7 @@ export default function AddUser(props) {
                 { user?.billing?.email && user?.billing?.email }{ user?.billing?.email &&< br/>}
                 { user?.billing?.phone && user?.billing?.phone }{ user?.billing?.phone &&< br/>}
             </p> 
+            <Pricelist pricelist={pricelist}/>
         </div>
         </CSSTransition>
         {isProcessing && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px'}} />}
@@ -198,6 +264,8 @@ export default function AddUser(props) {
                 visibility: hidden;
                 opacity: 0;
             }`}</style>
+            
+        <PricelistInfo {...{isInfoOpen, setIsInfoOpen}} />
         </>
     )
 }

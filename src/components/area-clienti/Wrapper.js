@@ -1,46 +1,23 @@
 import { signOut } from "next-auth/react";
 import cx from 'classnames'
-import { AppContext } from "../context/AppContext";
-import { useContext } from 'react';
 import { SpinnerDotted } from 'spinners-react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { isUndefined, isEmpty } from 'lodash';
+import NotLogged from './NotLogged';
 
-const NotLogged = ()=> {
-    const { setShowLogin } = useContext( AppContext );
-    return (
-        <div className="account__login">
-            <p>Devi accedere per consultare l'area clienti del sito.</p>
-            <button className="button button--rounded button--bg-black" onClick={()=>setShowLogin(true)}>Entra</button>
-            <style jsx>
-                {
-                    `.account__login {
-                        text-align:center;
-                        padding: 40px 0;
-                    }
-                    @media screen and (min-width:40em) {
-                        .account__login {
-                            padding: 80px 0;
-                        }
-                    }
-                    .account__login p {
-                        font-size: 20px;
-                        margin-bottom: 40px;
-                    }
-                    `
-                }
-            </style>
-        </div>
-    )
-}
+
 export default function Wrapper(props) {
     const { session, group } = props;
     const router = useRouter();
+    let isWholeSaler = false;
     const getRole = () => {
         let r;
         session?.user?.roles?.nodes.map((role) => {
             r = role?.displayName;
+            if( role?.name === 'wholesaler' ) {
+                isWholeSaler = true;
+            }
         })
         return r;
     }
@@ -63,20 +40,25 @@ export default function Wrapper(props) {
         },
     ];
 
-    if( ! isEmpty( group ) ) {
+
+    if( isWholeSaler ) {
+        const sub = [
+
+        ];
+        if( !isEmpty(group) ) {
+            sub.push({
+                'url' : '/area-clienti/rete/parrucchieri/',
+                'label' : `Parrucchieri (${group.length})`,
+            })
+        }
+        sub.push({
+            'url' : '/area-clienti/rete/aggiungi-utente/',
+            'label' : 'Aggiungi utente',
+        })
         menu.push({
             'label' : 'Rete',
             'url' : '/area-clienti/rete/',
-            'sub' : [
-                {
-                    'url' : '/area-clienti/rete/',
-                    'label' : `${getRole()} (${group.length})`,
-                },
-                {
-                    'url' : '/area-clienti/rete/aggiungi-utente/',
-                    'label' : 'Aggiungi utente',
-                }
-            ]
+            'sub' : sub
         });
     }
     menu.push({
@@ -89,7 +71,7 @@ export default function Wrapper(props) {
         <div className={cx('account')}>
             <div className="columns columns--shrink columns--grow-140-bottom columns--jcc">
                 <div className="column column--s10-lg">
-                    { !session?.user ? (<NotLogged />) : (
+                    { !session?.user ? (<NotLogged {...props} />) : (
                     <div className="columns columns--jcsb">
                         <aside className="column column--grow-80-bottom column--s3-lg column--s4-md column--aside">
                             <h1 className="title title--font-family-secondary title--normal title--grow-40-bottom title--font-size-24">Il mio account</h1>

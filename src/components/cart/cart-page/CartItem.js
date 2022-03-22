@@ -1,8 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useContext, useEffect } from 'react';
 import { v4 } from "uuid";
 import { getUpdatedItems } from "../../../functions";
 import { Loading } from "../../icons";
 import Link from 'next/link';
+import {AppContext} from "../../context/AppContext";
 
 const CartItem = ( {
 	                   item,
@@ -13,8 +14,8 @@ const CartItem = ( {
                        isMiniCart,
                    } ) => {
 
-	const [productCount, setProductCount] = useState( item.qty );
-
+	const [productCount, setProductCount] = useState( 0 );
+    const { setCartLoading } = useContext(AppContext);
     const inputBox = useRef();
 
 	/*
@@ -26,8 +27,7 @@ const CartItem = ( {
 	 * @return {void}
 	 */
 	const handleQtyValue = ( event, cartKey ) => {
-
-		if ( process.browser ) {
+        if ( process.browser ) {
 
 			event.stopPropagation();
 
@@ -45,10 +45,10 @@ const CartItem = ( {
 		}
 	};
 
-    const updateQtyChange = ()=> {
+    const updateQtyChange = (v)=> {
         if ( products.length ) {
-
-            const updatedItems = getUpdatedItems( products, q, cartKey );
+            setCartLoading( true );
+            const updatedItems = getUpdatedItems( products, v, item.cartKey );
 
             updateCart( {
                 variables: {
@@ -69,24 +69,13 @@ const CartItem = ( {
                 value = productCount + v > item.stock ? item.stock : productCount + v;
             }
             setProductCount(value);
+            updateQtyChange(  value  );
         }
     }
 
     useEffect(()=> {
-        if ( products.length ) {
-
-            const updatedItems = getUpdatedItems( products, productCount, item.cartKey );
-
-            updateCart( {
-                variables: {
-                    input: {
-                        clientMutationId: v4(),
-                        items: updatedItems
-                    }
-                },
-            } );
-        }
-    }, [ productCount ] );
+        setProductCount( item.qty )
+    }, [ item ] );
 
 	return (
         <>
@@ -107,7 +96,7 @@ const CartItem = ( {
                                 type="number"
                                 min="1"
                                 data-cart-key={ item.cartKey }
-                                max={ item.stock ? item.stock : false }
+                                max={ item.stock ? item.stock : undefined }
                                 value={ productCount }
                                 onChange={( event ) => handleQtyValue( event, item.cartKey )}
                                 ref={inputBox}
@@ -143,7 +132,7 @@ const CartItem = ( {
                         type="number"
                         min="1"
                         data-cart-key={ item.cartKey }
-                        max={ item.stock ? item.stock : false }
+                        max={ item.stock ? item.stock : undefined }
                         value={ productCount }
                         onChange={( event ) => handleQtyValue( event, item.cartKey )}
                         ref={inputBox}

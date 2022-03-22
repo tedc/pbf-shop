@@ -7,6 +7,7 @@ import Wrapper from '../../src/components/area-clienti/Wrapper';
 import Orders from '../../src/components/area-clienti/Orders';
 import BillingShippingForm from '../../src/components/area-clienti/BillingShippingForm';
 import GroupTable from '../../src/components/area-clienti/GroupTable';
+import CustomersOrders from '../../src/components/area-clienti/CustomersOrders';
 import AddUser from '../../src/components/area-clienti/AddUser';
 import Tutorials from '../../src/components/area-clienti/Tutorials';
 import { useSession } from 'next-auth/react';
@@ -16,7 +17,7 @@ import { GET_CUSTOMER_GROUP } from '../../src/queries/users/get-user';
 export default function AreaPage(props) {
     const pageProps = {...props, current: 'dashboard'};
     const { params } = props;
-    console.log( params )
+    console.log( props )
     const GetLayout = ()=> {
         if( params?.all.indexOf( 'ordini' ) !== -1) {
             return <Orders {...props} />
@@ -26,7 +27,12 @@ export default function AreaPage(props) {
             return <BillingShippingForm {...formProps} />
         } else if( params?.all.indexOf( 'rete' ) !== -1 ) {
             if( params?.all.indexOf( 'aggiungi-utente' ) === -1 ) {
-                return <GroupTable {...props} />
+                if( params?.all.indexOf( 'parrucchieri' ) === -1) {
+                    return <CustomersOrders {...props} />
+                } else {
+                    return <GroupTable {...props} />
+                }
+                
             } else {
                 return <AddUser {...props} />;
             }
@@ -47,17 +53,10 @@ export default function AreaPage(props) {
 export async function getServerSideProps ( context ) {
     const { params, req, res } = context || {};
     
-    const menus = await client.query({
-        query: GET_MENUS,
-    });
-
-    const countries = await client.query({
-        query: GET_COUNTRIES
-    });
-
+    
     const session = await getSession(context);
 
-    const children = await client.query( {
+    const { data } = await client.query( {
         query : GET_CUSTOMER_GROUP,
         variables: {
             parent : session?.user?.databaseId
@@ -81,14 +80,15 @@ export async function getServerSideProps ( context ) {
     return {
         props: {
             seo : seo,
-            menus: menus?.data?.menus,
-            options: menus?.data?.optionsPage?.impostazioni,
+            menus: data?.menus,
+            options: data?.optionsPage?.impostazioni,
             isCheckout: false,
-            categories: menus?.data?.categories?.nodes ?? [],
+            categories: data?.categories?.nodes ?? [],
             params: params,
             session: session,
-            group: children?.data?.customers?.nodes ?? [],
-            countries: countries?.data
+            group: data?.customers?.nodes ?? [],
+            countries: data?.wooCountries,
+            user: data?.customer,
         },
     }
 
@@ -96,10 +96,10 @@ export async function getServerSideProps ( context ) {
     //     props: {
     //         countries: countries?.data || {},
     //         seo : seo,
-    //         menus: menus?.data?.menus,
-    //         options: menus?.data?.optionsPage?.impostazioni,
+    //         menus: data?.menus,
+    //         options: data?.optionsPage?.impostazioni,
     //         isCheckout: false,
-    //         categories: menus?.data?.categories?.nodes ?? [],
+    //         categories: data?.categories?.nodes ?? [],
     //         authToken: authToken,
     //     },
     // };

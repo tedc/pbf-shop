@@ -18,7 +18,7 @@ const InputField = ({ handleOnChange, inputValue, name, type, label, errors, pla
             <input
                 onChange={ handleOnChange }
                 onBlur={ handleOnChange }
-                value={ inputValue }
+                value={ inputValue ?? '' }
                 placeholder={placeholder}
                 type={type}
                 name={name}

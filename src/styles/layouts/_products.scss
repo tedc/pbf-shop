@@ -114,13 +114,9 @@
             // border-top: 1px solid color(black);
             // border-bottom: 1px solid color(black);
             // border-left: 1px solid color(black);
-            &-{
-                &slider {
-
-                }
-            }
         }
         &single {
+            position: relative;
             padding-top: 80px;
             @include breakpoint(lg) {
                 padding-top: 125px;
@@ -176,7 +172,21 @@
                     }
                 }
             }
-            
+            &:after {
+                @include full;
+                content: '';
+                pointer-events: none;
+                z-index: 2;
+                background-color: transparentize(color(light), .15);
+                opacity: 0;
+                transition: opacity $speed*1.5;
+            }
+            &-loading {
+                &:after {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+            }
         }
         &tooltip {
             @include full;
@@ -225,6 +235,15 @@
         }
     }
     &__{
+        &sku {
+            font-size: 12px;
+            display: inline-block;
+            margin-top: -35px;
+            padding-bottom: 15px;
+            @include breakpoint() {
+                padding-bottom: 30px;
+            }
+        }
         &content {
             width: $f;
             flex: 0 0 auto;
@@ -275,6 +294,39 @@
                 padding-left: 0;
                 margin-right: 0;
                 margin-left: 0;
+            }
+        }
+
+        &fixed {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: $f;
+            padding: 15px;
+            background-color: color(black);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: color(white);
+            z-index: 2;
+            .price {
+                font-size: 24px;
+                display: flex;
+                align-items: center;
+                margin-right: 14px;
+                del {
+                    margin-left: 5px;
+                    font-size: 12px;
+                }
+            }
+            .product__add {
+                flex: 0 0 auto;
+            }
+            .button {
+                border: 1px solid color(white);
+            }
+            @include breakpoint() {
+                display: none;
             }
         }
         &add {

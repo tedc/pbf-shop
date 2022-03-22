@@ -48,6 +48,7 @@ export async function getServerSideProps ( context ) {
         opengraphImage: '',
         opengraphSiteName: ''
     }
+
     return {
         props: {
             seo : seo,
@@ -58,6 +59,7 @@ export async function getServerSideProps ( context ) {
             session: session,
             group: children?.data?.customers?.nodes ?? [],
             params: params,
+            user: children?.data?.customer,
         },
     }
 

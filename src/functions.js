@@ -292,7 +292,7 @@ export const createCheckoutData = ( order ) => {
 
 	if (order.createAccount) {
 		checkoutData.account = {
-			username: order.username,
+			username: order.username ?? billingData?.email,
 			password: order.password,
 		};
 	}

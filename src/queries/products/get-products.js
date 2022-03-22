@@ -50,7 +50,7 @@ query GET_PRODUCTS_BLOCKS( $salesQuery : RootQueryToProductConnectionWhereArgs )
  `;
 
  export const GET_PRODUCT_ARCHIVE = gql`
- query GET_PRODUCT_ARCHIVE( $uri: String ) {
+ query GET_PRODUCT_ARCHIVE( $uri: String, $offset: Int ) {
     
 ${SettingsFragment}
 ${CategoriesFragment}
@@ -61,7 +61,7 @@ ${CategoriesFragment}
             ...SeoFragment
         }
     }
-  products: products(where:{ typeIn: [SIMPLE,VARIABLE], offsetPagination: {size: ${PER_PAGE_FIRST} } }) {
+  products: products(where:{ hideOnB2c: false, typeIn: [SIMPLE,VARIABLE], offsetPagination: {size: ${PER_PAGE_FIRST}, offset: $offset } }) {
     edges {
       node {
         ${ProductFragment}

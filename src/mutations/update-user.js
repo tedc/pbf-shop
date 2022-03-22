@@ -41,3 +41,14 @@ mutation RegisterUser($input:CreateCustomerInput!) {
         }
     }
 }`;
+
+export const RESET_PASSWORD = gql`
+mutation RESET_PASSWORD($input:ResetUserPasswordInput!) {
+  resetUserPassword(
+    input: $input
+  ) {
+    user {
+      username
+    }
+  }
+}`;

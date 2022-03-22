@@ -278,11 +278,14 @@
             }
         }
         &search {
-            display: flex;
             align-items: center;
             justify-content: center;
             width: $f;
-            margin-top: $p;
+            padding-top: $p;
+            display: none;
+            .nav--archive-active & {
+                display: flex;
+            }
             input {
                 font-size: 11px;
                 &::placeholder {
@@ -325,7 +328,8 @@
             }
             @include breakpoint(xl) {
                 width: auto;
-                margin-top: 0;
+                padding-top: 0;
+                display: flex;
             }
         }
         &login {
@@ -632,6 +636,84 @@
                     transform: translate3d(0, 0, 0);
                 }
             }
+        }
+    }
+}
+
+.upload {
+    input {
+        display: none;
+    }
+    padding: 20px;
+    border-radius: 4px;
+    border: 1px dashed #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    i {
+        border-radius: $f;
+        background-color: color(black);
+        transition: opacity $speed;
+        &:before, &:after {
+            content: '';
+            width: 10px;
+            height: 2px;
+            top: 50%;
+            background-color: color(white);
+            position: absolute;
+            left: 50%;
+            margin: -1px 0 0 -5px;
+        }
+        
+    }
+    &__{
+        &btn {
+            position: relative;
+            width: 30px;
+            height: 30px;
+            margin-left: 20px;
+            &:after {
+                transform: translate3d(0, 0, 0) rotate(90deg);
+            }
+        }
+        &clear, &info {
+            position: absolute;
+            width: $p;
+            height: $p;
+            top: 10px;
+            z-index: 100;
+            &:hover {
+                opacity: 0.5;
+            }
+        }
+        &clear {
+            right: 10px;
+            &:after {
+                transform: translate3d(0, 0, 0) rotate(45deg);
+            }
+            &:before {
+                transform: translate3d(0, 0, 0) rotate(-45deg);
+            }
+        }
+        &info {
+            left: 10px;
+            font-size: 10px;
+            color: white;
+            text-align: center;
+            line-height: 22px;
+            font-weight: bold;
+            font-style: normal;
+            &:before, &:after {
+                display: none;
+            }
+        }
+    }
+    &:hover {
+        .upload__btn {
+            opacity: .6;
         }
     }
 }

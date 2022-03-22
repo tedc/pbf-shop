@@ -43,7 +43,7 @@ export default function Login(props) {
                 redirect: false,
             }).then((data)=> {
                 setLoading( false );
-                if( isEmpty(data?.error) ) {   
+                if( isEmpty(data?.error) ) {  
                     setShowLogin( false );
                     setSession( session );
                     router.reload();
@@ -91,7 +91,7 @@ export default function Login(props) {
                     <input type="email" name="username" placeholder="Email" value={username} onChange={handleOnChange}/>
                     <input type="password" name="password" placeholder="Password"  value={password} onChange={handleOnChange}/>
                     <button className="button button--rounded button--bg-white" disabled={ !validationResult.isValid  }>Accedi</button>
-                    <p className="paragraph paragraph--register">Non sei registrato? <Link href="/registrazione/"><a>Inizia da qui</a></Link></p>
+                    <p className="paragraph paragraph--register">Non sei registrato? <Link href="/registrazione/"><a><strong>Inizia da qui</strong></a></Link>.<br/>Se invece non ricordi la password, <Link href="/area-clienti/lost-password/"><a><strong>Clicca qui?</strong></a></Link></p>
                     <CSSTransition in={!isNull(errorMessage)} timeout={750} classNames="fade-in" unmountOnExit>
                         <div className="message message--error">{ errorMessage }</div>
                     </CSSTransition>

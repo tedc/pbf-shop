@@ -80,8 +80,8 @@ const StateSelection = ({handleOnChange, input, states, isFetchingStates, isShip
                 <div className="select">
                     <Select 
                         styles={customStyles}
-                        className="select__wrapper"
                         id={inputId}
+                        instanceId={inputId}
                         isClearable={true}
                         defaultValue={current}
                         onChange={(newValue) => handleOnChange(handleSelect(newValue), isShipping, true)}

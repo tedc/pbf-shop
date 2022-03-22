@@ -116,6 +116,21 @@
     &-anim {
         @include cssTransition();
     }
+    &:after {
+        @include full;
+        content: '';
+        pointer-events: none;
+        background-color: transparentize(color(black), .35);
+        opacity: 0;
+        transition: opacity $speed;
+        z-index: 1;
+    }
+    &--loading {
+        &:after {
+            pointer-events: auto;
+            opacity: 1;
+        }
+    }
     /* purgecss end ignore */
     &__{
         &item {

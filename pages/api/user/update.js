@@ -1,6 +1,6 @@
 import { getSession } from "next-auth/react";
 import { UpdateUser } from '../../../src/utils/user';
-import { isEmpty } from 'lodash';
+import { isEmpty, isNull } from 'lodash';
 
 export default async function handler(req, res) {
 
@@ -15,11 +15,14 @@ export default async function handler(req, res) {
         responseData.error = 'Required data not sent';
         return responseData;
     }
-
+    const session = await getSession({req});
+    if (isNull(session)) {
+        responseData.error = 'Devi essere loggato';
+        res.status(401).json(responseData);
+    }
     const inputs = req.body;
     try {
 
-        const session = await getSession({req});
 
         const {data, error} = await UpdateUser(inputs, session?.accessToken);
 

@@ -3,6 +3,10 @@ const ProductFragment = `
     name
     databaseId
     onSale
+    userVisibility {
+        id
+        role
+    }
     productCategories {
         edges {
             node {

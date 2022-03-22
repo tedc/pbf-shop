@@ -13,7 +13,7 @@ import { useSession } from 'next-auth/react';
 
 const AddToCart = (props) => {
 
-    const {product, input} = props;
+    const {product, input, fixed} = props;
     const [quantity, setQuantity] = useState(1);
     const productQryInput = {
         clientMutationId: v4(), // Generate a unique id.
@@ -21,13 +21,12 @@ const AddToCart = (props) => {
         quantity: quantity,
     };
 
-    const { setCart,  showInCart, setShowInCart } = useContext(AppContext);
+    const { cart, setCart,  refetchCart, showInCart, setShowInCart, setCartLoading, setMenuVisibility } = useContext(AppContext);
     const [requestError, setRequestError] = useState( null );
 
 
     const {data: session } = useSession();
 
-        // Get Cart Data.
     const {data, refetch} = useQuery(GET_CART, {
         notifyOnNetworkStatusChange: true,
         context: {
@@ -36,16 +35,17 @@ const AddToCart = (props) => {
             }
         },
         onCompleted: () => {
-            console.log( {'button' : data })
             // Update cart in the localStorage.
             const updatedCart = getFormattedCart(data);
-
             localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
 
             // Update cart data in React Context.
             setCart(updatedCart);
+            setCartLoading(false);
         }
     });
+
+        // Get Cart Data.
 
     // Add to Cart Mutation.
     const [onAddToCart, {
@@ -62,8 +62,7 @@ const AddToCart = (props) => {
             }
         },
         onCompleted: () => {
-            // On Success:
-            // 1. Make the GET_CART query to update the cart with new values in React context.
+            // 2. Show View Cart Button
             refetch({
                 context: {
                     headers: {
@@ -71,9 +70,6 @@ const AddToCart = (props) => {
                     }
                 },
             });
-
-            // 2. Show View Cart Button
-            setShowInCart( true );
         },
         onError: (error) => {
             if (error) {
@@ -82,6 +78,9 @@ const AddToCart = (props) => {
         }
     });
     const handleAddToCartClick = async () => {
+        setMenuVisibility( true );
+        setShowInCart( true );
+        setCartLoading(true);
         productQryInput.quantity = quantity;
         setRequestError(null);
         await onAddToCart();

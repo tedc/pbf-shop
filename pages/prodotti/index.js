@@ -8,11 +8,11 @@ import { GET_PRODUCT_ARCHIVE } from '../../src/queries/products/get-products';
 import Seo from '../../src/components/seo';
 import { getSession } from 'next-auth/react';
 export default function Prodotti(props) {
-    const { products, categories, params, pageInfo } = props;
+    const { products, categories, params, pageInfo, pageNo } = props;
     return (
         <Layout {...props}>
             <Seo seo={props.seo} uri={props.uri} />
-            <ProductArchive {...{products, categories, params, pageInfo}}  />
+            <ProductArchive {...{products, categories, params, pageInfo, pageNo }}  />
         </Layout>
     )
 };
@@ -22,6 +22,7 @@ export async function getStaticProps(  ) {
         query: GET_PRODUCT_ARCHIVE,
         variables: { 
             uri : '/prodotti', 
+            offset: 0
         },
     });
     const queryParams = [];
@@ -41,7 +42,9 @@ export async function getStaticProps(  ) {
             pageInfo: data?.products?.pageInfo,
             menus : data?.menus,
             options : data?.optionsPage?.impostazioni,
-            params: queryParams ?? null
+            params: queryParams ?? null,
+            pageNo: 1
         },
+        revalidate: 60
     }
 };

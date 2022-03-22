@@ -44,6 +44,17 @@ export const PAGE_BY_URI = gql`
                                 databaseId
                                 slug
                                 name
+                                parentDatabaseId
+                                ancestors {
+                                    nodes {
+                                        slug
+                                        ancestors {
+                                            nodes {
+                                                slug
+                                            }
+                                        }
+                                    }
+                                }
                             }
                         }
                         name

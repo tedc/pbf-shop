@@ -17,7 +17,16 @@ const api = new WooCommerceRestApi({
     url: process.env.NEXT_PUBLIC_WORDPRESS_URL,
     consumerKey: process.env.WC_CONSUMER_KEY,
     consumerSecret: process.env.WC_CONSUMER_SECRET,
-    version: "wc/v3"
+    version: "wc/v3",
+    queryStringAuth: true,
+    axiosConfig: {
+        headers: { 'Content-Type': 'application/json' },
+        insecureHTTPParser: true,
+        auth: {
+            username: process.env.WC_CONSUMER_KEY,
+            password: process.env.WC_CONSUMER_SECRET
+        },
+    }
 });
 
 /**

@@ -23,13 +23,9 @@ export default function AreaPage(props) {
 export async function getServerSideProps ( context ) {
     const { params, req, res } = context || {};
     
-    const menus = await client.query({
-        query: GET_MENUS,
-    });
-
     const session = await getSession(context);
 
-    const children = await client.query( {
+    const { data } = await client.query( {
         query : GET_CUSTOMER_GROUP,
         variables: {
             parent : session?.user?.databaseId
@@ -54,12 +50,13 @@ export async function getServerSideProps ( context ) {
     return {
         props: {
             seo : seo,
-            menus: menus?.data?.menus,
-            options: menus?.data?.optionsPage?.impostazioni,
+            menus: data?.menus,
+            options: data?.optionsPage?.impostazioni,
             isCheckout: false,
-            categories: menus?.data?.categories?.nodes ?? [],
+            categories: data?.categories?.nodes ?? [],
             session: session,
-            group: children?.data?.customers?.nodes ?? [],
+            group: data?.customers?.nodes ?? [],
+            user: data?.customer,
         },
     }
 
@@ -67,10 +64,10 @@ export async function getServerSideProps ( context ) {
     //     props: {
     //         countries: countries?.data || {},
     //         seo : seo,
-    //         menus: menus?.data?.menus,
-    //         options: menus?.data?.optionsPage?.impostazioni,
+    //         menus: data?.menus,
+    //         options: data?.optionsPage?.impostazioni,
     //         isCheckout: false,
-    //         categories: menus?.data?.categories?.nodes ?? [],
+    //         categories: data?.categories?.nodes ?? [],
     //         authToken: authToken,
     //     },
     // };

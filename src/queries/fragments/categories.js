@@ -11,7 +11,7 @@ categories: productCategories(where: {orderby: NAME, order: ASC, parent: 0, hide
                 slug
                 ancestors {
                     nodes {
-                        id
+                        slug
                     }
                 }
             }

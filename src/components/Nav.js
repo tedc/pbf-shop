@@ -12,6 +12,7 @@ import Image from '../image';
 import Login from './commons/Login';
 import { useSession } from "next-auth/react";
 import { AppContext } from "./context/AppContext";
+import { SpinnerDotted } from 'spinners-react'; 
 
 const ProductsMenu = ({categories})=> {
     return (
@@ -100,8 +101,8 @@ const Nav = (props) => {
         }
     })
     gsap.registerPlugin(ScrollTrigger);
-    const { showLogin, setShowLogin, session, setSession } = useContext( AppContext );
-	const [ isMenuVisible, setMenuVisibility ] = useState(false);
+    const { showLogin, setShowLogin, session, setSession, isMenuVisible, setMenuVisibility } = useContext( AppContext );
+    const [ isBannerActive, setIsBannerActive ] = useState(false);
     const [ banner, setBanner ] = useState( false);
     const [ isBannerMenuVisible, setIsBannerMenuVisible] = useState(false);
     const { data : currentSession, status } = useSession();
@@ -119,8 +120,7 @@ const Nav = (props) => {
         } else {
             router.push(path);
         }
-    }
-
+    }   
     const showMenu = (path, cond)=>{
         if( path.indexOf('prodotti') !== -1) {
             setIsBannerMenuVisible( cond );
@@ -129,20 +129,25 @@ const Nav = (props) => {
 
     useEffect(()=> {
         setBanner( !isNull(document.querySelector('.hero img')) && !isEmpty(document.querySelector('.hero img')) && !isUndefined(document.querySelector('.hero img')) );
-        ScrollTrigger.create({
+        const scrollTrigger = ScrollTrigger.create({
             start: 40,
             trigger: document.body,
-            toggleClass: {
-                className: 'banner--inview',
-                targets: navRef.current,
-            }
+            onEnter: ()=> {
+                setIsBannerActive(true);
+            },
+            onLeaveBack: ()=> {
+                setIsBannerActive(false);
+            },
         });
         setSession( currentSession );
+        return ()=> {
+            if( !isNull( scrollTrigger ) ) scrollTrigger.kill()
+        }
     }, [ currentSession ]);
 
 	return (
         <>
-		<nav className={cx('banner','banner--shrink', { 'banner--clear': banner, 'banner--open' : isMenuVisible }, {'banner--menu-visible' : isBannerMenuVisible })} ref={navRef}>
+		<nav className={cx('banner','banner--shrink', {'banner--inview' : isBannerActive, 'banner--clear': banner, 'banner--open' : isMenuVisible }, {'banner--menu-visible' : isBannerMenuVisible })} ref={navRef}>
 			<Link href="/">
                 <a className="brand">
                     <Logo />
@@ -174,21 +179,23 @@ const Nav = (props) => {
                 </>
                 <div className="banner__tools">
                     <CartIcon/>
-                    <div className={cx('banner__account', { 'banner__account--loading' : status === 'loading'})}>
-                    {
-                        !session?.user ? (
-                            <a href="#" onClick={(event)=> openLogin(event, '/area-clienti')} className="button button--rounded button--bg-black">
-                                Area clienti
-                            </a>
-
-                        ) : (
+                    <div className={cx('banner__account')}>
+                    <CSSTransition in={ status === 'unauthenticated' } timeout={500} classNames="account-loading" unmountOnExit>
+                        <a href="#" onClick={(event)=> openLogin(event, '/area-clienti')} className="button button--rounded button--bg-black">
+                            Area clienti
+                        </a>
+                    </CSSTransition>
+                    <CSSTransition in={ status === 'authenticated' } timeout={500} classNames="account-loading" unmountOnExit>
                         <Link href="/area-clienti">
                             <a>
                                 <Account width={15} height={15} />
                                 { session?.user?.customer?.displayName ? session?.user?.customer?.displayName : session?.user?.nicename }
                             </a>
                         </Link>
-                    ) }
+                    </CSSTransition>
+                    <CSSTransition in={ status === 'loading' } timeout={500} classNames="account-loading" unmountOnExit>
+                        <SpinnerDotted  style={{ color: 'black', position: 'absolute', top: '50%', left: '50%', width: 24, height: 24, margin: -12}} /> 
+                    </CSSTransition>
                     </div> 
                 </div>
             </div>
@@ -197,6 +204,25 @@ const Nav = (props) => {
         <CSSTransition in={showLogin} timeout={300} classNames="form--login" unmountOnExit>
             <Login {...options} />
         </CSSTransition>
+        <style jsx>{
+            `
+            .account-loading-enter {
+                opacity: 0;
+            }
+            .account-loading-enter-active {
+                opacity: 1;
+                transition: opacity .5s;
+            }
+            .account-loading-exit {
+                opacity: 1;
+            }
+            .account-loading-exit-active {
+                opacity: 0;
+                transition: opacity .5s;
+            }
+            `
+        }
+        </style>
         </>
 	)
 };

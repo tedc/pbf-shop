@@ -12,6 +12,7 @@ import { isEmpty, isUndefined, isNull } from 'lodash';
 import Title from '../../commons/Title';
 import CartRelated from './CartRelated';
 import FormCoupon from './FormCoupon';
+import CartEmpty from './CartEmpty';
 
 
 const CartItemsContainer = (props) => {
@@ -233,16 +234,7 @@ const CartItemsContainer = (props) => {
                 <CartRelated {...{categories, kits}} />
                 </>
 			) : (
-				<div className="columns columns--cart-empty columns--jcc columns--grow-140 columns--shrink">
-                <div className="column column--s10">
-					<h2 className="title title--font-size-38 title--grow-40-bottom">Il tuo carrello è vuoto</h2>
-					<Link href="/prodotti">
-						<button className="button button--rounded button--bg-black">
-							Vai allo shop
-						</button>
-					</Link>
-                </div>
-				</div>
+				<CartEmpty />
 			) }
 		</div>
 

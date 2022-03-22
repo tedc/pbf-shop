@@ -109,8 +109,6 @@ export default function Register(props) {
             }
         }
         setIsProcessing( false );
-        
-        console.log( data )
     }
 
 

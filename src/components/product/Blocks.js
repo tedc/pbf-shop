@@ -76,7 +76,7 @@ export default function Blocks(props) {
         <>
             {
                 rows.map((row, index)=> (
-                    <div key={row} className={cx('columns', 'columns--block', {'columns--reverse': index%2 === 0},{'columns--block-last': index === rows.length - 1})} key={row}>
+                    <div key={`row-${index}`} className={cx('columns', 'columns--block', {'columns--reverse': index%2 === 0},{'columns--block-last': index === rows.length - 1})}>
                         <div className="column column--figure column--figure-full column--s6-sm">
                             {
                                 !isEmpty(row.image) && !isNull(row.image) ? (
@@ -109,7 +109,7 @@ export default function Blocks(props) {
                                 { !isEmpty(row.rows) && !isNull(row.rows) ? (
                                     <>
                                     {row.rows.map((item, index)=> (
-                                        <Row {...item} key={item}/>
+                                        <Row {...item} key={`row-item-${index}`}/>
                                     ))
                                     }
                                     </>
@@ -117,7 +117,7 @@ export default function Blocks(props) {
                                 { !isEmpty(row.icons) && !isNull(row.icons) ? (
                                     <div className="columns columns--jcc">
                                     {row.icons.map((item, index)=> (
-                                        <Icon {...item} key={item} />
+                                        <Icon {...item} key={`row-icon-${index}`} />
                                     ))
                                     }
                                     </div>

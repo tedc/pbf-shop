@@ -12,9 +12,10 @@ export const AppProvider = ( props ) => {
     gsap.registerPlugin(ScrollTrigger);
 	const [ cart, setCart ] = useState( null );
     const [ showInCart, setShowInCart ] = useState( false );
+    const [ cartLoading, setCartLoading ] = useState( false );
     const [ showLogin, setShowLogin ] = useState(false);
     const [ session, setSession ] = useState( null );
-
+    const [ isMenuVisible, setMenuVisibility ] = useState(false);
     const getVh = ()=> {
         const ratio = window.innerWidth / 1366;
         const vh = window.innerHeight * 0.01;
@@ -59,7 +60,7 @@ export const AppProvider = ( props ) => {
 	}, [] );
 
 	return (
-		<AppContext.Provider value={ { cart, setCart, showInCart, setShowInCart, showLogin, setShowLogin, session, setSession } }>
+		<AppContext.Provider value={ { cart, setCart, showInCart, setShowInCart, showLogin, setShowLogin, session, setSession, cartLoading, setCartLoading, isMenuVisible, setMenuVisibility } }>
 			{ props.children }
 		</AppContext.Provider>
 	);

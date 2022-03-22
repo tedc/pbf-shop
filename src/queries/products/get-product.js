@@ -13,10 +13,14 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
         averageRating
         slug
         name
-        description
+        shortDescription
         metaData {
             key
             value
+        }
+        userVisibility {
+            id
+            role
         }
         seo {
             ...SeoFragment
@@ -37,6 +41,8 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
         }
         details {
             capacity
+            hideOnB2c
+            wholesalerProduct
             firstTab {
                 content
                 title
@@ -157,18 +163,21 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
             id
             regularPrice
             stockQuantity
+            sku
         }
         ... on VariableProduct {
             price
             id
             regularPrice
             stockQuantity
+            sku
         }
         ... on ExternalProduct {
             price
             id
             regularPrice
             externalUrl
+            sku
         }
         ... on GroupProduct {
             products {
@@ -178,6 +187,7 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
                         price
                         regularPrice
                         stockQuantity
+                        sku
                     }
                 }
             }

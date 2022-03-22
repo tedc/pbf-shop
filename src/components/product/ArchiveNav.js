@@ -152,16 +152,17 @@ const SubNav = (props)=> {
 
 export default function ArchiveNav({categories,searchQuery, setSearchQuery, handleSearchFormSubmit, session}) {
     const [ state, setState ] = useState( null );
-    const [ media, setMedia ] = useState( false )
+    const [ media, setMedia ] = useState( false );
+    const [ isNavOpen, setIsNavOpen ] = useState(false);
     const router = useRouter();
     
     const uparams = productsUrlParams(router);
 
     let NavTitle = () => <Title title={{
-                        content: 'Le mie esigenze',
-                        type: 'h2',
-                        size: 'title--font-size-38'
-                    }} />
+        content: 'Le mie esigenze',
+        type: 'h2',
+        size: 'title--font-size-38'
+    }} />
 
     const [ role, setRole ] = useState( null );
    
@@ -170,11 +171,12 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
         const v = state === id ? false : id;
         setState( v )
     }
+
     useEffect(() => {
-         if( session?.user ) {
+        if( session?.user ) {
             session?.user?.roles?.nodes.map((r) => {
                 setRole( r?.name !== 'customer' ? r?.name : null )
-            })
+            });
         }
         const vw = 87.875;
         const matchMin = window.matchMedia(`(min-width:${vw}em)`);
@@ -182,25 +184,32 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
         window.addEventListener('resize', () => {
             const matchMin = window.matchMedia(`(min-width:${vw}em)`);
             setMedia( matchMin.matches );
-        })
-    }, [ ])
+        });
+        return ()=> {
+            setMedia( false );
+            setRole( null );
+        }
+    }, [ session  ])
     return (
         <div className="header header--archive">
-            <nav className="nav nav--archive nav--grow-30 nav--bg-black nav--shrink">
+            <nav className={cx('nav nav--archive nav--grow-30 nav--bg-black nav--shrink', {'nav--archive-active': isNavOpen})}>
                 { role === 'wholesaler' || role === 'hairdresser' ? (
-                    <div className="nav__header">
+                    <div className="nav__header" onClick={()=> setIsNavOpen(!isNavOpen)}>
                         <h5 className='title title--upper' style={{marginBottom: 10, fontSize: 9}}>Benvenuto</h5>
                         <Title title={{
                             content: session?.user?.nicename,
                             type: 'h2',
                             size: 'title--font-size-38'
                         }} />
+                        <div className="nav__toggle"></div>
                     </div>
                 ) : (<Title title={{
-                    content: 'Le mie esigenze',
+                    content: 'Le mie esigenze <div class="nav__toggle"></div>',
                     type: 'h2',
-                    size: 'title--font-size-38'
+                    size: 'title--font-size-38',
+                    fn: ()=> setIsNavOpen(!isNavOpen)
                 }} />) }
+
                 
                 <ul className="nav__list">
                     {

@@ -1,3 +1,33 @@
+%toggle {
+    width: 12px;
+    height: 12px;
+    margin-left: 10px;
+    &:before, &:after {
+        content: '';
+        position: absolute;
+        background-color: color(white);
+    }
+    &:before {
+        width: $f;
+        height: 1px;
+        top: 50%;
+        transform: translate3d(0, -50%, 0);
+        left: 0;
+    }
+    &:after {
+        width: 1px;
+        top: 0;
+        height: $f;
+        left: 50%;
+        transform: translate3d(-50%, 0, 0);
+        transition: transform $speed;
+    }
+    @include breakpoint() {
+        width: 8px;
+        height: 8px;
+    }
+}
+
 .hero {
     display: flex;
     flex-direction: column;
@@ -95,6 +125,15 @@
 .nav {
     @include shrink_sides();
     @include grows();
+    .title {
+        width: $f;
+        cursor: pointer;
+        position: relative;
+        @include breakpoint(xl) {
+            width: auto;
+            cursor: auto;
+        }
+    }
     &--{
         &bg-black {
             background-color: color(black);
@@ -102,15 +141,40 @@
         }
     }
     &__{
+        &header {
+            width: $f;
+            position: relative;
+            cursor: pointer;
+            @include breakpoint(xl) {
+                width: auto;
+                cursor: auto;
+            }
+        }
+        &toggle {
+            position: absolute;
+            right: 0;
+            top: 50%;
+            margin-top: -6px;
+            @extend %toggle;
+            .nav--archive-active & {
+                &:after {
+                    transform: translate3d(-50%, 0, 0) scaleY(0);
+                }
+            }
+        }
         &list {
             font-size: 12px;
-            display: flex;
+            display: none;
             justify-content: space-between;
             flex-wrap: wrap;
             width: $f;
+            .nav--archive-active & {
+                display: flex;
+            }
             @include breakpoint(xl) {
                 margin: 0 30px 0 0;
                 width: auto;
+                display: flex;
             }
         }
         &cat {
@@ -128,31 +192,9 @@
                 opacity: 0.7;
             }
             i {
-                width: 8px;
-                height: 8px;
-                margin-left: 10px;
+                @extend %toggle;
                 position: relative;
                 top: -1px;
-                &:before, &:after {
-                    content: '';
-                    position: absolute;
-                    background-color: color(white);
-                }
-                &:before {
-                    width: $f;
-                    height: 1px;
-                    top: 50%;
-                    transform: translate3d(0, -50%, 0);
-                    left: 0;
-                }
-                &:after {
-                    width: 1px;
-                    top: 0;
-                    height: $f;
-                    left: 50%;
-                    transform: translate3d(-50%, 0, 0);
-                    transition: transform $speed;
-                }
             }
             &--active {
                 i {
@@ -186,15 +228,13 @@
                 display: flex;
                 align-items: center;
                 flex-wrap: wrap;
-                padding-top: $p;
+                padding-top: 10px;
                 padding-bottom: $p;
             }
             li {
+                padding-top: 10px;
                 @include breakpoint(xl, false) {
                     width: $f;
-                    & + li {
-                        margin-top: 10px;
-                    }
                 }
                 .nav__cat & {
                     a { color: color(white)}
@@ -237,11 +277,15 @@
             }
         }
         &order {
-            margin-top: $p;
+            padding-top: $p;
             width: $f;
             position: relative;
             font-size: 10px;
             cursor: pointer;
+            display: none;
+            .nav--archive-active & {
+                display: block;
+            }
             span {
                 text-transform: uppercase;
                 display: inline-flex;
@@ -296,8 +340,9 @@
                 }
             }
             @include breakpoint(xl) {
-                margin-top: 0;
-                width: auto;   
+                padding-top: 0;
+                width: auto;  
+                display: block; 
             }
         }
     }
@@ -347,6 +392,8 @@
     padding-top: 15px;
     padding-bottom: 30px;
     border-top: 1px solid color(black);
+    border-bottom: 1px solid color(black);
+    margin-bottom: -1px;
     display: flex;
     align-items: center;
     flex-wrap: wrap;

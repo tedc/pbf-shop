@@ -9,13 +9,16 @@ import validateAndSanitizeCheckoutForm from '../../validator/checkout';
 import {getFormattedCart, createCheckoutData,} from "../../functions";
 import OrderSuccess from "./OrderSuccess";
 import FormCoupon from '../cart/cart-page/FormCoupon';
+import CartEmpty from '../cart/cart-page/CartEmpty';
 import GET_CART from "../../queries/get-cart";
 import CHECKOUT_MUTATION from "../../mutations/checkout";
 import APPLY_COUPON from "../../mutations/apply-coupon";
 import Address from "./Address";
+import InputField from "./form-elements/InputField";
 import {
     handleShippingDifferentThanBilling,
-    handleCreateAccount, handleStripeCheckout, handleSimpleCheckout,
+    handleCreateAccount, 
+    handleStripeCheckout, handleSimpleCheckout, handlePayPalCheckout,
     setStatesForCountry, handleTerms
 } from "../../utils/checkout";
 import CheckboxField from "./form-elements/CheckboxField";
@@ -25,6 +28,8 @@ import {CardNumberElement,
   CardExpiryElement} from '@stripe/react-stripe-js';
 import { isEmpty, isNull, isUndefined} from 'lodash';
 import { SpinnerDotted } from 'spinners-react';
+import { useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 
 // Use this for testing purposes, so you dont have to fill the checkout form over an over again.
 // const defaultCustomerInfo = {
@@ -61,6 +66,15 @@ const defaultCustomerInfo = {
 
 const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
 
+    const [ isUserFetching, setIsUserFetching ] = useState( false );
+    const [ showPayment, setShowPayment ] = useState(true);
+
+    const { data: session, status } = useSession();
+
+    const router = useRouter();
+
+    const [ role, setRole ] = useState( null );
+    
     const {billingCountries, shippingCountries} = countriesData || {}
 
     const initialState = {
@@ -70,6 +84,7 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
         shipping: {
             ...defaultCustomerInfo
         },
+        password: '',
         createAccount: false,
         orderNotes: '',
         shippingDifferentThanShipping: false,
@@ -88,6 +103,11 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
     const [isStripeOrderProcessing, setIsStripeOrderProcessing] = useState(false);
     const [isSimpleOrderProcessing, setIsSimpleOrderProcessing] = useState(false);
     const [createdOrderData, setCreatedOrderData] = useState({});
+    const [ cardFilled, setCardFilled ] = useState({
+        expiry: false,
+        cardNumber: false,
+        cvc: false
+    })
 
     const { loading, error, data, refetch } = useQuery( GET_CART, {
         notifyOnNetworkStatusChange: true,
@@ -154,21 +174,29 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
 
             return;
         }
-
-        if ( 'stripe' === input.paymentMethod ) {
+        if ( 'stripe' === input?.paymentMethod ) {
             const createdOrderData = await handleStripeCheckout(input, cart?.products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData);
-        	return null;
-        }
+        	router.push(`/thank-you?order_id=${createdOrderData?.order_id}`);
+            return null;
+        } else if( 'paypal' === input?.paymentMethod ) {
+            const createdOrderData = await handlePayPalCheckout(input, cart?.products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData);
+            const links = createdOrderData?.data?.links;
+            let url = '';
+            links.map(link => {
+                if(link.rel === 'approve') {
+                    url = link.href;
+                }
+            });
+            window.location = url;
+            return createdOrderData;
+        } 
 
         const createdOrderData = await handleSimpleCheckout(input, cart?.products, setRequestError, clearCartMutation, setIsSimpleOrderProcessing, setCreatedOrderData);
-
         const checkOutData = createCheckoutData(input);
         setRequestError(null);
-        /**
-         *  When order data is set, checkout mutation will automatically be called,
-         *  because 'orderData' is added in useEffect as a dependency.
-         */
         setOrderData(checkOutData);
+        router.push(`/thank-you?order_id=${createdOrderData?.order_id}`);
+        return null;
     };
 
     /*
@@ -203,12 +231,18 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
     };
 
     const disabled = ()=> {
+        console.log(  input?.billing?.touched, input?.shippingDifferentThanShipping )
         if( !input?.shippingDifferentThanShipping ) {
             if( isNull( input?.billing?.touched ) ) {
                 return true;
             }
         }  else {
             if( isNull( input?.billing?.touched ) || isNull( input?.shipping?.touched ) ) {
+                return true;
+            }
+        }
+        if( input?.paymentMethod === 'stripe' ) {
+            if( !cardFilled.expiry || !cardFilled.cvc || !cardFilled.cardNumber ) {
                 return true;
             }
         }
@@ -238,10 +272,8 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
 
     const handleBillingChange = async (target) => {
         const billingValidationResult = validateAndSanitizeCheckoutForm( {...input?.billing, [target.name]: target.value}, theBillingStates?.length);
-        
         const newState = {...input, billing: {...input?.billing, [target.name]: target.value, errors: billingValidationResult.errors, touched: {...input?.billing?.touched, [target.name]: true}}};  
         setInput(newState);
-        
         await setStatesForCountry(target, setTheBillingStates, setIsFetchingBillingStates);
     }
 
@@ -271,16 +303,56 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
     }
 
     useEffect(async () => {
-
         if (null !== orderData) {
-            // Call the checkout mutation when the value for orderData changes/updates.
             await checkout();
         }
+        if( status === 'authenticated' ) {
+            setIsUserFetching( true );
+            const user = session?.user;
+            user?.roles?.nodes.map((r) => {
+                setShowPayment( r?.name !== 'wholesaler' );
+                setRole( r?.name );
+            });
+            const obj = {...input, billing : { ...input?.billing, ...user?.billing}, shipping: { ...input?.shipping, ...user?.shipping}};
+            if( !isUndefined(obj.billing['__typename'])) delete obj.billing['__typename'];
+            if( !isUndefined(obj.shipping['__typename'])) delete obj.shipping['__typename'];
+            // if( !isEmpty(user.shipping, true) ) {
+            //     obj.shipping.touched = {}
+            // }
+            if( !isEmpty(user.billing, true) ) {
+                obj.billing.touched = {};
+                obj.billing.errors = {};
+            }
 
-    }, [orderData]);
+            if( !isEmpty(user.shipping, true) ) {
+                obj.shipping.touched = {};
+                obj.shipping.errors = {};
+            }
+            
+            for( let key in user?.billing) {
+                const item = user?.billing[key];
+                if( !isNull( item ) && key !== '__typename' ) {
+                    obj.billing.touched[key] = true;
+                }
+            }
+
+            for( let key in user?.shipping) {
+                const item = user?.shipping[key];
+                if( !isNull( item ) && key !== '__typename' ) {
+                    obj.shipping.touched[key] = true;
+                }
+            }
+
+            setInput(obj);
+            setIsUserFetching( false );
+        }
+        return ()=> {
+            setIsProcessing( false );
+        }
+    }, [orderData, status]);
 
     // Loading state
-    const isOrderProcessing = checkoutLoading || isStripeOrderProcessing || loading || isSimpleOrderProcessing;
+    const isOrderProcessing = checkoutLoading || isStripeOrderProcessing || loading || isSimpleOrderProcessing || status === 'loading' || isUserFetching;
     
     return (
         <>  
@@ -302,6 +374,35 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
                                             isShipping={false}
                                             isBillingOrShipping
                                         />
+                                        { status !== 'authenticated' && <div className="column column--grow-30-bottom"><CheckboxField
+                                            name="createAccount"
+                                            type="checkbox"
+                                            checked={input?.createAccount}
+                                            handleOnChange={handleOnChange}
+                                            label="Crea un account con queste credenziali"
+                                        /></div> }
+                                        { status !== 'authenticated' && input?.createAccount && <><InputField
+                                            name="username"
+                                            inputValue={input?.username}
+                                            required={false}
+                                            type="email"
+                                            handleOnChange={handleOnChange}
+                                            label="Email per il login (se vuoi usarne una diversa da quella di fatturazione)"
+                                            errors={input?.errors}
+                                            touched={input?.touched}
+                                            isShipping={false}
+                                        /><InputField
+                                            name="password"
+                                            inputValue={input?.password}
+                                            required={input?.role === 'customer'}
+                                            handleOnChange={handleOnChange}
+                                            label="Password"
+                                            type="password"
+                                            errors={input?.errors}
+                                            touched={input?.touched}
+                                            isShipping={false}
+                                        />
+                                        </>}
                                         <div className="column column--grow-30-bottom">
                                             <CheckboxField
                                                 name="shippingDifferentThanShipping"
@@ -311,6 +412,7 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
                                                 label="Vuoi spedire a un indirizzo differente?"
                                             />
                                         </div>
+                                        
                                     </div>
                                 </div>
                                     {/*Shippin Details*/}
@@ -330,8 +432,10 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
                                     </div>
                                 </div>
                             ) : null}
-                                <PaymentModes input={input} handleOnChange={handleOnChange} gateways={gateways} CardNumberElement={CardNumberElement} CardCvcElement={CardCvcElement} CardExpiryElement={CardExpiryElement} />
+
+                                { showPayment && <PaymentModes input={input} handleOnChange={handleOnChange} gateways={gateways} CardNumberElement={CardNumberElement} CardCvcElement={CardCvcElement} CardExpiryElement={CardExpiryElement} cardFilled={cardFilled} setCardFilled={setCardFilled} /> }
                             </div>
+                            
                             <div className="column column--s4-md column--s3-lg">
                                 <FormCoupon cart={cart} setRequestError={setRequestError} refetch={refetch} />
                                 {/* Order & Payments*/}
@@ -360,7 +464,7 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
                         </form>
                     </div>
                 </div>
-            ) : null}
+            ) : <CartEmpty />}
             {/*	Show message if Order Success*/}
             <OrderSuccess response={checkoutResponse}/>
         </>

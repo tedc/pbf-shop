@@ -1,5 +1,5 @@
 import {isArray, isEmpty} from "lodash";
-import axios from "axios";
+import axios from 'axios';
 
 /**
  * Get line items for stripe
@@ -93,8 +93,11 @@ export const getCreateOrderData = (order, products) => {
         },
         payment_method: order?.paymentMethod,
         line_items: getCreateOrderLineItems( products ),
+        set_paid : order?.set_paid ?? false
     };
 }
+
+
 
 /**
  * Create order.
@@ -109,7 +112,7 @@ export const createTheOrder = async ( orderData, setOrderFailedError, previousRe
     let response = {
         orderId: null,
         total: '',
-        currency: '',
+        currency: 'eur',
         error: ''
     };
 
@@ -140,6 +143,7 @@ export const createTheOrder = async ( orderData, setOrderFailedError, previousRe
         response.orderId = result?.orderId ?? '';
         response.total = result.total ?? '';
         response.currency = result.currency ?? '';
+        response.status = result.staus ?? 'pending';
 
     } catch ( error ) {
         // @TODO to be handled later.
@@ -149,3 +153,116 @@ export const createTheOrder = async ( orderData, setOrderFailedError, previousRe
 
     return response;
 }
+
+export const status = (v)=> {
+    const s = v.toUpperCase();
+    let string;
+    if( s === 'PENDING') {
+        string = 'In attesa di pagamento';
+    } else if ( s === 'PROCESSING') {
+        string = 'In lavorazione';
+    } else if( s === 'ON_HOLD' ) {
+        string = 'Sospeso'
+    } else if( s === 'COMPLETED') {
+        string = 'Completato';
+    } else if( s === 'CANCELLED') {
+        string = 'Annullato';
+    } else if( s === 'CANCELLED') {
+        string = 'Annullato';
+    } else if( s === 'REFUNDED') {
+        string = 'Rimborsato';
+    } else if( s === 'FAILED') {
+        string = 'Fallito';
+    }
+    return string;
+}
+
+export const getOrderData = (order)=> {
+    let obj = {};
+    Object.entries(order).map( ([key, value])=> {
+        let k  = '';
+        if( key === 'date_created') {
+            k = 'date';
+            obj = {
+                ...obj,
+                [k] :value
+            }
+        } else if( key === 'number') {
+            obj = {
+                ...obj,
+                orderNumber :value
+            }
+        }  else {
+            if( key === 'billing' || key === 'shipping') {
+                if( key === 'billing') {
+                    obj = {
+                        ...obj,
+                        hasBillingAddress  : !isEmpty(order?.billing, true)
+                    }
+                } else {
+                    obj = {
+                        ...obj,
+                        hasShippingAddress  : !isEmpty(order?.billing, true)
+                    }
+                }
+
+                const subObj = {};
+                Object.entries(value).map( ([sk, v])=> {
+                    let subK = '';
+                    if( /(address_)/.test(sk) ) {
+                        subK = sk.replace('_', '');
+                    } else {
+                        const keyObj = sk.split('_');
+                        keyObj.map((newK, index)=> {
+                            if( index === 0) {
+                                subK += newK;
+                            } else {
+                                const str = newK.charAt(0).toUpperCase() + newK.slice(1);
+                                subK += str;
+                            }
+                        });
+                    }
+                    subObj[subK] = v;
+                });
+                obj = {
+                    ...obj,
+                    [key] :subObj
+                }
+            } else {
+                const keyObj = key.split('_');
+                keyObj.map((newK, index)=> {
+                    if( index === 0) {
+                        k += newK;
+                    } else {
+                        const str = newK.charAt(0).toUpperCase() + newK.slice(1);
+                        k += str;
+                    }
+                });
+                obj = {
+                    ...obj,
+                    [k] :value
+                }
+            }
+        } 
+        
+    });
+
+    return obj;
+}
+
+export const getApiCredentials = ()=> axios({
+    url: `${process.env.PAYPAL_REST_URL}/v1/oauth2/token`,
+    method: 'post',
+    headers: {
+        Accept: 'application/json',
+        'Accept-Language': 'it_IT',
+        'content-type': 'application/x-www-form-urlencoded',
+    },
+    auth: {
+        username: process.env.PAYPAL_CLIENT_ID,
+        password: process.env.PAYPAL_CLIENT_SECRET,
+    },
+    params: {
+        grant_type: 'client_credentials',
+    },
+});

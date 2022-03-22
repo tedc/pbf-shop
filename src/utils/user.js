@@ -1,7 +1,8 @@
 import client from "../components/ApolloClient";
-import { UPDATE_USER, REGISTER_USER } from '../mutations/update-user';
+import { UPDATE_USER, REGISTER_USER, RESET_PASSWORD } from '../mutations/update-user';
 import { v4 } from 'uuid';
 import { isEmpty } from 'lodash';
+import axios from 'axios';
 
 
 export async function UpdateUser(input, token, update = true) {
@@ -18,6 +19,20 @@ export async function UpdateUser(input, token, update = true) {
                 'authorization' : token ? `Bearer ${token}`: '',
             }
         }
+    } );
+
+    return {data, errors} || {};
+}
+
+export async function ResetPassword(input) {
+    const { data, errors } = await client.mutate( {
+        mutation: RESET_PASSWORD,
+        variables: {
+            input: {
+                ...input,
+                clientMutationId: v4(),
+            },
+        },
     } );
 
     return {data, errors} || {};
@@ -72,7 +87,6 @@ export const TableStyles = `
 `;
 
 export const displayName = (client)=> {
-    console.log( client )
     if( !isEmpty( client?.displayName?.trim() ) ) {
         return client?.displayName;
     } else if( !isEmpty( client?.firstNam?.trim() ) || !isEmpty( client?.lastName?.trim() ) ) {
@@ -91,3 +105,30 @@ export const date = (d)=> {
         year: 'numeric', month: 'numeric', day: 'numeric'
     });
 }
+
+export const getRole = (session)=> {
+    const roles = session?.user?.roles?.nodes;
+    const array = []
+    if( !isEmpty( roles) ) {
+        roles.map((node)=> {
+            array.push(node?.name);
+        });
+    }
+    if( array.indexOf('wholesaler') !== -1 ) {
+        return 'wholesaler';
+    } else if( array.indexOf('hairdresser') !== -1 ) {
+        return 'hairdresser';
+    } else {
+        return 'customer';
+    }
+}
+
+export const pricelistLayouts = [
+    {key: 'sku', label: 'Codice prodotto'}, {key: 'nome', label: 'Nome prodotto'}, {key : 'email', label: 'Email parrucchiere'}, {key: 'prezzo', label : 'Prezzo'}, {key: 'qta', label : 'Quantità'}
+];
+
+export const getWholesalerOrders = (session)=> axios.get(`${process.env.NEXT_PUBLIC_WORDPRESS_URL}/wp-json/pbf/v1/wholesaler-orders`, {
+    headers: {
+        Authorization: `Bearer ${session?.accessToken}`
+    }
+});

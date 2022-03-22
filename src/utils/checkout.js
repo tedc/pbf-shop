@@ -7,6 +7,8 @@ import GET_STATES from "../queries/get-states";
 import {createTheOrder, getCreateOrderData} from "./order";
 import {clearTheCart} from "./cart";
 
+import axios from 'axios';
+
 /**
  * Get states
  *
@@ -79,63 +81,105 @@ export const handleTerms = ( input, setInput, target ) => {
 export const handleStripeCheckout = async (input, products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData) => {
     setIsStripeOrderProcessing(true);
     const orderData = getCreateOrderData( input, products );
-    const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
-    const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
-    setIsStripeOrderProcessing(false);
-
-
-    if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
-        console.log( 'came in' );
-        setRequestError('Clear cart failed')
-    	return null;
-    }
+    orderData.set_paid = true;
 
     // On success show stripe form.
-    setCreatedOrderData(createCustomerOrder)
-    await createCheckoutSessionAndRedirect( products, input, createCustomerOrder?.orderId );
+    try {
+        const session = await createCheckoutSessionAndRedirect( products, input );
+        const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
+        setCreatedOrderData(createCustomerOrder);
+
+        const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
+        setIsStripeOrderProcessing(false);
+
+        if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
+            setRequestError('Clear cart failed')
+            return null;
+        }
+        return createCustomerOrder;
+    } catch(error) {
+        return error;
+    }
+    
+
+    // try {
+    //     const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
+    //     if (stripe) {
+    //         stripe.redirectToCheckout({ sessionId: session.id, successUrl : `${success_url}&order_id=${createCustomerOrder?.orderId}` });
+    //     }
+    // } catch (error) {
+    //     console.log( input );
+    // }
 
     return createCustomerOrder;
 }
 
-export const handleSimpleCheckout = async (input, products, setRequestError, clearCartMutation, setIsSimpleOrderProcessing, setCreatedOrderData) => {
-    setIsSimpleOrderProcessing(true);
+export const handlePayPalCheckout = async (input, products, setRequestError, clearCartMutation, setIsPaypalOrderProcessing, setCreatedOrderData) => {
+    setIsPaypalOrderProcessing(true);
     const orderData = getCreateOrderData( input, products );
     const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
     const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
-    setIsSimpleOrderProcessing(false);
 
-    console.log( createCustomerOrder )
     if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
-        setRequestError('Clear cart failed')
+        console.log( 'came in' );
+        setRequestError('Clear cart failed');
+        setIsPaypalOrderProcessing(false);
         return null;
     }
 
     // On success show stripe form.
     setCreatedOrderData(createCustomerOrder)
-    await createCheckoutSessionAndRedirect( products, input, createCustomerOrder?.orderId );
+    const data = await createPayPalCheckoutSession( products, input, createCustomerOrder?.orderId );
+    setIsPaypalOrderProcessing(false);
+    return data;
+}
 
-    return createCustomerOrder;
+export const handleSimpleCheckout = async (input, products, setRequestError, clearCartMutation, setIsSimpleOrderProcessing, setCreatedOrderData) => {
+    setIsSimpleOrderProcessing(true);
+    setCreatedOrderData(createCustomerOrder)
+    try {
+        const orderData = getCreateOrderData( input, products );
+        const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
+        const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
+        setIsSimpleOrderProcessing(false);
+        if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
+            setRequestError('Clear cart failed')
+            return null;
+        }
+
+        return createCustomerOrder;
+
+    } catch(error) {
+        setIsSimpleOrderProcessing(false);
+        setRequestError("Si è verificato un errore durante il pagamento.")
+        return null;
+    }
+    
+    
+
+    // On success show stripe form.
+
 }
 
 const createCheckoutSessionAndRedirect = async ( products, input, orderId ) => {
     const sessionData = {
-        success_url: window.location.origin + `/thank-you?session_id={CHECKOUT_SESSION_ID}&order_id=${orderId}`,
+        success_url: window.location.origin + `/thank-you?session_id={CHECKOUT_SESSION_ID}`,
         cancel_url: window.location.href,
-        customer_email: input.billingDifferentThanShipping ? input?.billing?.email : input?.shipping?.email,
+        customer_email: input?.billing?.email,
         line_items: getStripeLineItems( products ),
-        metadata: getMetaData( input, orderId ),
+        metadata: getMetaData( input ),
         payment_method_types: ['card'],
         mode: 'payment'
     }
-    const session = await createCheckoutSession(sessionData)
+    
     try {
-        const stripe = await loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-        if (stripe) {
-            stripe.redirectToCheckout({ sessionId: session.id });
-        }
-    } catch (error) {
-        console.log( error );
+        const session = await createCheckoutSession(sessionData);
+        return session;
+        
+    } catch(error) {
+        console.log(input);
     }
+    
 }
 
 const getStripeLineItems = (products) => {
@@ -148,10 +192,83 @@ const getStripeLineItems = (products) => {
             quantity: product?.qty ?? 0,
             name: product?.name ?? '',
             images: [product?.image?.sourceUrl ?? ''],
-            amount: Math.round(product?.price * 100),
-            currency: 'usd',
+            amount: product?.price,
+            currency: 'eur',
         }
     })
+}
+
+const createPayPalCheckoutSession = async ( products, input, orderId) => {
+    let total = 0;
+    const items = [];
+    products.map(product => {
+        const qty = product?.qty,
+            amount = product?.price,
+            subTotal = amount * qty
+        total += subTotal;
+        const item = {
+            name: product?.name,
+            quantity: qty,
+            sku: product?.sku,
+            category: 'PHYSICAL_GOODS',
+            unit_amount: {
+                currency_code: 'EUR',
+                value: amount
+            }
+        };
+
+        items.push(item);
+    })
+    const paypalData = {
+        intent: 'CAPTURE',
+        payer: {
+            email_address: input?.billing?.email,
+            name: {
+                given_name: input?.billing?.firstName,
+                surname: input?.billing?.lastName,
+            },
+            phone: {
+                phone_number: { national_number : input?.billing?.phone }
+            },
+            address: {
+                address_line_1: !input?.shippingDifferentThanShipping ? input?.billing?.address1 : input?.shipping?.address1,
+                address_line_2: !input?.shippingDifferentThanShipping ? input?.billing?.address2 : input?.shipping?.address2,
+                postal_code: !input?.shippingDifferentThanShipping ? input?.billing?.postcode : input?.shipping?.postcode,
+                country_code: !input?.shippingDifferentThanShipping ? input?.billing?.country : input?.shipping?.country,
+                admin_area_1: !input?.shippingDifferentThanShipping ? input?.billing?.state : input?.shipping?.state,
+                admin_area_2: !input?.shippingDifferentThanShipping ? input?.billing?.city : input?.shipping?.city,
+            }
+        },
+        purchase_units: [{
+            amount: {
+                currency_code: 'EUR',
+                value: total,
+                breakdown: {
+                    item_total: {
+                        currency_code: 'EUR',
+                        value: total
+                    }
+                }
+            },
+            items,
+        }],
+        application_context: {
+            user_action: 'PAY_NOW',
+            brand_name: 'Professional By Fama',
+            locale: 'it-IT',
+            landing_page: 'LOGIN',
+            return_url: window.location.origin + `/thank-you?order_id=${orderId}`,
+            cancel_url: `${window.location.origin}/checkout`,
+        }
+    }
+
+    try {
+        const { data } = await axios.post('/api/get-paypal-session', paypalData);
+        return data;
+    } catch(error) {
+        return error;
+    }
+
 }
 
 /**
@@ -167,7 +284,6 @@ export const getMetaData = ( input, orderId ) => {
     return {
         billing: JSON.stringify(input?.billing),
         shipping: JSON.stringify(input.billingDifferentThanShipping ? input?.billing?.email : input?.shipping?.email),
-        orderId,
     };
 
     // @TODO

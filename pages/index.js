@@ -95,6 +95,6 @@ export async function getStaticProps ( ) {
             categories: data?.categories?.nodes ?? [],
             databaseId: data?.page?.databaseId ?? null
         },
-        revalidate: 1
+        revalidate: 60
     }
 };

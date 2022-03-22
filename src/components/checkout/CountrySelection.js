@@ -1,10 +1,10 @@
 import Error from './Error';
-import {isEmpty, isNull, find} from "lodash";
+import {isEmpty, isNull, find, debounce} from "lodash";
 import Abbr from "./form-elements/Abbr";
 import ArrowDown from "../icons/ArrowDown";
 import Select from 'react-select';
 import cx from 'classnames';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const CountrySelection = ({input, handleOnChange, countries, isShipping, touched}) => {
 
@@ -13,11 +13,11 @@ const CountrySelection = ({input, handleOnChange, countries, isShipping, touched
     const [value, setValue] = useState( {
         target: {
             name: 'country',
-            value: country
+            value: ''
         }
     } );
 
-    const current = find(countries, (item) => item.value === country)
+    const [current, setCurrent] = useState( find(countries, (item) => item.value === country) );
 
     const inputId = `country-${isShipping ? 'shipping' : 'billing'}`;
 
@@ -70,6 +70,16 @@ const CountrySelection = ({input, handleOnChange, countries, isShipping, touched
             cursor: 'pointer',
         })
     }
+
+    useEffect(()=> {
+        setValue( {
+            target: {
+                name: 'country',
+                value: country
+            }
+        } );
+        setCurrent( find(countries, (item) => item.value === country) );
+    }, [country]);
     return (
         <div className="column column--input column--relative column--grow-30-bottom column--s6">
             <label className="label" htmlFor={inputId}>
@@ -80,11 +90,12 @@ const CountrySelection = ({input, handleOnChange, countries, isShipping, touched
                 <Select 
                     styles={customStyles}
                     id={inputId}
+                    instanceId={inputId}
                     isClearable={true}
                     //defaultInputValue={country}
                     defaultValue={current}
-                    onChange={(newValue) => { handleOnChange( handleSelect(newValue), isShipping, true)} }
-                    onBlur={(event) => { handleOnChange( value, isShipping, true ) } }
+                    onChange={(newValue) => {  handleOnChange( handleSelect(newValue), isShipping, true)} }
+                    onBlur={(event) => debounce( () => handleOnChange( value, isShipping, true ), 20 ) }
                     onFocus={(event) => { handleOnChange( value, isShipping, true ) } }
                     onKeyDown={(event) => handleOnChange( value, isShipping, true ) }
                     options={countries}
