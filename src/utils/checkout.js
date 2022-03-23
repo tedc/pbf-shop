@@ -136,7 +136,6 @@ export const handlePayPalCheckout = async (input, products, setRequestError, cle
 
 export const handleSimpleCheckout = async (input, products, setRequestError, clearCartMutation, setIsSimpleOrderProcessing, setCreatedOrderData) => {
     setIsSimpleOrderProcessing(true);
-    setCreatedOrderData(createCustomerOrder)
     try {
         const orderData = getCreateOrderData( input, products );
         const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
@@ -147,6 +146,7 @@ export const handleSimpleCheckout = async (input, products, setRequestError, cle
             return null;
         }
 
+        setCreatedOrderData(createCustomerOrder);
         return createCustomerOrder;
 
     } catch(error) {

@@ -31,6 +31,7 @@ export default async function handler(req, res) {
 
         responseData.success = true;
         responseData.order = data;
+        console.log( data )
         res.json(responseData)
 
     } catch (error) {

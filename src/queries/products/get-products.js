@@ -52,7 +52,7 @@ query GET_PRODUCTS_BLOCKS( $salesQuery : RootQueryToProductConnectionWhereArgs )
  export const GET_PRODUCT_ARCHIVE = gql`
  query GET_PRODUCT_ARCHIVE( $uri: String, $offset: Int ) {
     
-${SettingsFragment}
+    ${SettingsFragment}
 ${CategoriesFragment}
    page: pageBy(uri: $uri) {
         id
@@ -66,7 +66,6 @@ ${CategoriesFragment}
       node {
         ${ProductFragment}
       }
-      cursor
     }
     pageInfo {
       offsetPagination {
@@ -75,6 +74,26 @@ ${CategoriesFragment}
     }
   }
  }
+${SeoFragment}
+`;
+
+export const GET_PRODUCT_ARCHIVE_NEW = gql`
+query GET_PRODUCT_ARCHIVE( $uri: String) {
+    ${SettingsFragment}
+    ${CategoriesFragment}
+    page: pageBy(uri: $uri) {
+        id
+        uri
+        seo {
+            ...SeoFragment
+        }
+    }
+    products: products(first:9999) {
+        nodes {
+                ${ProductFragment}
+            }
+        }
+    }
 ${SeoFragment}
 `;
 

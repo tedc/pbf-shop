@@ -27,17 +27,12 @@ const ThankYouContent = () => {
     const token = process.browser ? router?.query?.token : null;
     const order_id = process.browser ? router?.query?.order_id : null;
     const [ order, setOrder ] = useState(null);
-    const [ fetchOrder, { data, error, loading }] = useLazyQuery(GET_ORDER, {
-        onCompleted : ()=> {
-            setOrder( data?.order );
-            setSessionFetching( false );
-        }
-    });
+   
     useEffect(() => {
         if (process.browser && !isUndefined( order_id ) && !isNull( order_id ) ) {
             localStorage.removeItem('woo-next-cart');
             setCart(null);
-            if( !isNull(token) ) {
+            if( !isNull(token) && !isUndefined(token) ) {
                 const transactionData = {
                     token: token,
                     order_id : order_id
@@ -55,6 +50,7 @@ const ThankYouContent = () => {
                                 const orderData = getOrderData( data?.order );
                                 setOrder( orderData );
                                 setSessionFetching( false );
+                                console.log( data );
                             })
                         }
                     });
@@ -68,6 +64,7 @@ const ThankYouContent = () => {
                     const orderData = getOrderData( data?.order );
                     setOrder( orderData );
                     setSessionFetching( false );
+                    console.log( data );
                 })
             }
            

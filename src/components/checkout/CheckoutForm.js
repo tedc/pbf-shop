@@ -195,7 +195,7 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
         const checkOutData = createCheckoutData(input);
         setRequestError(null);
         setOrderData(checkOutData);
-        router.push(`/thank-you?order_id=${createdOrderData?.order_id}`);
+        router.push(`/thank-you?order_id=${createdOrderData?.orderId}`);
         return null;
     };
 

@@ -16,6 +16,11 @@ const ProductFragment = `
         role
     }
     categoryName
+    details {
+        hideOnB2c
+        wholesalerProduct
+    }
+    productCategoriesIds
     ... on SimpleProduct {  
         sku
         price
