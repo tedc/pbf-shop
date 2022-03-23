@@ -4,7 +4,7 @@ import { GET_GATEWAYS } from '../../queries/get-gateways';
 import { useState, useEffect } from 'react';
 import { date } from '../../utils/user';
 import { status } from '../../utils/order';
-import { isUndefined } from 'lodash';
+import { isUndefined, isNull } from 'lodash';
 
 
 const ShippingAddress = ({order})=> {
@@ -54,6 +54,7 @@ const OrderDiv = ({order, session}) => {
             }
         });
     }
+
     
 
     let getRole;
@@ -63,8 +64,9 @@ const OrderDiv = ({order, session}) => {
         });
     }  
     useEffect(()=> {
-        if( getRole === 'hairdresser') setWholesaler( session?.user?.parentName )
-    }, [ session ] );
+        if( getRole === 'hairdresser') setWholesaler( session?.user?.parentName );
+        console.log( order )
+    }, [ session, method ] );
     return (
         <>
         <div className="order__header">
@@ -83,7 +85,7 @@ const OrderDiv = ({order, session}) => {
                 </div>
                 <div className="order__column column column--auto">
                     Metodo ti pagamento<br/>
-                    <strong>{ order?.paymentMethod === 'stripe' ? 'Carta di credito' : order?.paymentMethodTitle }</strong>
+                    <strong>{ order?.paymentMethod === 'stripe' ? 'Carta di credito' : (isNull(method) ? order?.paymentMethodTitle : method?.title )}</strong>
                 </div>
                 <div className="order__column column column--auto">
                     Stato<br/>
