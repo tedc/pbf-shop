@@ -84,6 +84,30 @@ export const TableStyles = `
     font-weight: bold;
     font-size: 15px;
 }
+@media screen and (max-width:39.99em) {
+    .table--private thead {
+        display: none;
+    }
+    .table--private tr {
+        display: block;
+        border-bottom: 1px solid black;
+        padding: 10px 0;
+    }
+    .table--private tbody tr:nth-child(1) {
+        border-top: 1px solid black;
+    }
+
+    .table--private td[data-title] {
+        border: 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 0!important;
+    }
+    .table--private td[data-title]:before {
+        content: attr(data-title);
+    }
+}
 `;
 
 export const displayName = (client)=> {

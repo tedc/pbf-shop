@@ -30,7 +30,7 @@ const CheckoutBanner = (options)=> {
         </Link>
         { !isEmpty(options?.sitePhone) && !isNull( options?.sitePhone ) &&
         <div className="banner__phone">
-            Hai bisogno di aiuto?
+            <span>Hai bisogno di aiuto?</span>
             <a href={ `tel:${options?.sitePhone}` }><Phone />{options?.sitePhone}</a>
         </div> }
     </nav> 

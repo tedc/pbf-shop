@@ -24,18 +24,14 @@ export default function AreaPage(props) {
 
 export async function getServerSideProps ( context ) {
     const { params, req, res } = context || {};
-    
-    const menus = await client.query({
-        query: GET_MENUS,
-    });
-
-    const countries = await client.query({
-        query: GET_COUNTRIES
-    });
 
     const session = await getSession(context);
+    if( session === null ) {
+        res.setHeader('Location', '/area-clienti');
+        res.statusCode = 302;
+    }
 
-    const children = await client.query( {
+    const { data } = await client.query( {
         query : GET_CUSTOMER_GROUP,
         variables: {
             parent : session?.user?.databaseId
@@ -46,6 +42,7 @@ export async function getServerSideProps ( context ) {
             }
         }
     });
+
     const seo = {
         title: 'Area clienti | Professional By Fama',
         metaRobotsNoindex: 'noindex',
@@ -58,15 +55,15 @@ export async function getServerSideProps ( context ) {
     return {
         props: {
             seo : seo,
-            menus: menus?.data?.menus,
-            options: menus?.data?.optionsPage?.impostazioni,
+            menus: data?.menus,
+            options: data?.optionsPage?.impostazioni,
             isCheckout: false,
-            categories: menus?.data?.categories?.nodes ?? [],
+            categories: data?.categories?.nodes ?? [],
             params: params,
             session: session,
-            group: children?.data?.customers?.nodes ?? [],
-            countries: countries?.data,
-            user: children?.data?.customer,
+            group: data?.customers?.nodes ?? [],
+            countries: data?.wooCountries,
+            user: data?.customer,
         },
     }
 
@@ -74,10 +71,10 @@ export async function getServerSideProps ( context ) {
     //     props: {
     //         countries: countries?.data || {},
     //         seo : seo,
-    //         menus: menus?.data?.menus,
-    //         options: menus?.data?.optionsPage?.impostazioni,
+    //         menus: data?.menus,
+    //         options: data?.optionsPage?.impostazioni,
     //         isCheckout: false,
-    //         categories: menus?.data?.categories?.nodes ?? [],
+    //         categories: data?.categories?.nodes ?? [],
     //         authToken: authToken,
     //     },
     // };

@@ -1,12 +1,15 @@
 import { find, isEmpty, isNull } from 'lodash';
 import { TableStyles, displayName, date } from '../../utils/user';
+import { status } from '../../utils/order';
 import Link from 'next/link';
 import { Dropzone } from '@dropzone-ui/react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import cx from 'classnames';
 import Pricelist from './Pricelist';
 import PricelistInfo from './PricelistInfo';
 import axios from 'axios';
+import { CSSTransition } from 'react-transition-group';
+import { SpinnerDotted } from 'spinners-react'; 
 
 const OrdersTable = ({orders})=> {
     return (
@@ -62,16 +65,17 @@ const OrdersTable = ({orders})=> {
 }
 
 export default function Customer(props) {
-    const { params, group, } = props;
+    const { params, group, session } = props;
     const { billingCountries } = props?.countries || {};
     const customer = find(group, (c)=> c?.databaseId === parseInt( params?.id) );
+    const [ loading, setLoading ] = useState(false);
     const [ isProcessing, setIsProcessing ] = useState( false );
     const [ files, setFiles ] = useState( [] );
     const [ pricelist, setPricelist ] = useState( null );
     const [ errorMessage, setErrorMessage ] = useState(null); 
     const [ isInfoOpen, setIsInfoOpen ] = useState(false);
     const [ isSuccess, setIsSuccess ] = useState(false);
-
+    const [orders, setOrders] = useState([]);
     const handleFileInput = (files) => {
         setIsProcessing(true)
         setFiles(files)
@@ -107,6 +111,18 @@ export default function Customer(props) {
     const country = (c)=> {
         return find(billingCountries, (co) => co?.value === c);
     }
+    useEffect(()=>{
+        setLoading( true );
+        const { data, success, error } = axios.post('/api/user/get-orders', {
+            customerId: customer?.databaseId
+        }).then((res)=> {
+            const data = res?.data;
+            if( data?.success ) {
+                setOrders( data?.data?.customer?.orders?.nodes );
+            }
+            setLoading( false );
+        })
+    }, [ session ])
     return (
         <>
         <h2 className="title title--grow-40-bottom title--font-size-24">{ displayName(customer) }</h2>
@@ -170,7 +186,7 @@ export default function Customer(props) {
                 <div className="data">
                     Numero ordini<br/>
                     <strong>
-                        { !isEmpty( customer?.orders?.nodes ) ? customer?.orders?.nodes?.length : 0 }
+                        { customer?.orderCount  }
                     </strong>
                 </div>
             </div>
@@ -236,6 +252,82 @@ export default function Customer(props) {
             `
         }</style>
         <PricelistInfo {...{isInfoOpen, setIsInfoOpen}} />
+        <CSSTransition classNames="fade-in" timeout={750} in={!isEmpty( orders) && !loading} unmountOnExit>
+            <div className="orders">
+            <h2 className="title title--grow-40-bottom title--font-size-24">Ordini</h2>
+            <table className="table table--private">
+                    <thead>
+                        <tr>
+                            <th>
+                                Ordine
+                            </th>
+                            <th>
+                                Elementi
+                            </th>
+                            <th>
+                                Prezzo
+                            </th>
+                            <th>
+                                Data
+                            </th>
+                            <th>
+                                Stato
+                            </th>
+                        </tr>
+                    </thead>
+            <tbody>
+                {
+                    orders.map( (order, index) => (
+                        <tr key={`${order?.orderNumber}-${index}`}>
+                            <td data-title="Ordine">
+                                <Link href={{
+                                    pathname: '/area-clienti/ordine/[id]',
+                                    query : {
+                                        id: order?.orderNumber
+                                    }
+                                }}>
+                                    <a>#{ order?.orderNumber }</a>
+                                </Link>
+                            </td>
+                            <td data-title="Elementi">
+                                { order?.lineItems?.nodes.length }
+                            </td>
+                            <td data-title="Prezzo">
+                                { order?.total }
+                            </td>
+                            <td data-title="Data">
+                                { date( order?.date ) }
+                            </td>
+                            <td data-title="Stato">
+                                { status( order?.status) }
+                            </td>
+                        </tr>
+                    ))
+                }
+                    </tbody>
+
+                </table>
+            </div>
+            </CSSTransition>
+            <CSSTransition in={ loading } timeout={750} classNames="account-loading" unmountOnExit>
+            <SpinnerDotted  style={{ color: 'black', position: 'absolute', top: '50%', left: '50%', margin: -35}} /> 
+            </CSSTransition>
+            <style jsx>{
+            `${TableStyles}
+             .fade-in-enter {
+                opacity: 0;
+            }
+            .fade-in-enter-active {
+                opacity: 1;
+                transition: opacity .75s;
+            }
+            .fade-in-exit {
+                opacity: 1;
+            }
+            .fade-in-exit-active {
+                opacity: 0;
+                transition: opacity .75s;
+            }`}</style>
         </>
     )
 }

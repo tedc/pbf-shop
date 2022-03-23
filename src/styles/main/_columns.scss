@@ -442,18 +442,20 @@
                 }
             }
             border-top: 1px solid color(black);
-            .swiper-wrapper {
-                .swiper-slide:nth-child(1) {
-                    border-left: 1px solid color(black);
-                }
-            }
+            // .swiper {
+            //     border-left: 1px solid color(black);
+            //     border-right: 1px solid color(black);
+            // }
+            
             .swiper-slide {
                 border-right: 1px solid color(black);
+                margin-right: -1px;
+                border-left: 1px solid color(black);
             }
             @include breakpoint() {
                 .swiper-slide {
+                    margin-right: 0;
                     border-right: 0;
-                    border-left: 1px solid color(black);
                 }
             }
             .nav {

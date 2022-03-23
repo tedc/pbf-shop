@@ -7,11 +7,6 @@ import {useRef, useEffect} from 'react';
 
 export default function ProdctSlider({products, slides, blockId}) {
     const slidesPerView = slides === 1 ?  'auto' : 3;
-    const breakpoints = {
-        768 : {
-            slidesPerView: slidesPerView,
-        }
-    }
     const loop = slides === 1 || products.length < 3 ? false : true;
     const [nextEl, nextElRef] = useSwiperRef();
     const [prevEl, prevElRef] = useSwiperRef();

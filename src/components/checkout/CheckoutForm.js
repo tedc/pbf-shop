@@ -356,12 +356,12 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
     return (
         <>  
             {cart ? (
-                <div className="columns columns--shrink columns--grow-140-bottom columns--jcc">
+                <div className="columns columns--shrink columns--grow-80-bottom columns--jcc">
                     <div className="column column--s10-lg">
                         <form onSubmit={handleFormSubmit} className={cx('form', 'form--main', 'form--checkout', 'columns', 'columns--jcsb', {'form--loading' : isOrderProcessing})}>
                             <h2 className="column title title--font-size-38 title--grow-40-bottom"><span className="num">01</span>Indirizzo di fatturazione</h2>
                                    
-                            <div className="column column--s7-md column--s8-lg">
+                            <div className="column column--grow-60-bottom column--s7-md column--s8-lg">
                                 <div className="checkout__billing">
                                      <div className="columns columns--gutters">
                                         <Address
@@ -435,7 +435,7 @@ const CheckoutForm = ({countriesData, gateways, stripe, elements}) => {
                                 { showPayment && <PaymentModes input={input} handleOnChange={handleOnChange} gateways={gateways} CardNumberElement={CardNumberElement} CardCvcElement={CardCvcElement} CardExpiryElement={CardExpiryElement} cardFilled={cardFilled} setCardFilled={setCardFilled} /> }
                             </div>
                             
-                            <div className="column column--s4-md column--s3-lg">
+                            <div className="column column--grow-60-bottom column--s4-md column--s3-lg">
                                 <FormCoupon cart={cart} setRequestError={setRequestError} refetch={refetch} />
                                 {/* Order & Payments*/}
                                 <div className="checkout__summary">

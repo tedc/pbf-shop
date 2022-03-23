@@ -98,9 +98,11 @@ query GET_CUSTOMER_GROUP($parent:Int) {
 
 export const GET_ORDERS = gql`
 query GET_ORDERS($customerId:Int!) {
-    orders(where: {customerId: $customerId}, first: 9999) {
-        nodes {
-            ${OrderFragment}
+    customer(customerId: $customerId) {
+        orders(first: 9999, where: { statuses : [PENDING, FAILED, PROCESSING, ON_HOLD, COMPLETED, REFUNDED]}) {
+            nodes {
+                ${OrderFragment}
+            }
         }
     }
 }

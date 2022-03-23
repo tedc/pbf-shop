@@ -340,9 +340,8 @@
                 }
             }
             @include breakpoint(md, false) {
-                flex-wrap: wrap;
-                a {
-                    width: $f;
+                span {
+                    display: none;
                 }
             }
         }

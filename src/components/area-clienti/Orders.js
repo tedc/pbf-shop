@@ -2,29 +2,30 @@ import { isEmpty } from 'lodash';
 import Link from 'next/link';
 import { TableStyles, date } from '../../utils/user';
 import { status } from '../../utils/order';
-import { useQuery } from '@apollo/client';
 import { useState, useEffect } from 'react';
-import { GET_ORDERS } from '../../queries/users/get-user'; 
 import { CSSTransition } from 'react-transition-group';
 import { SpinnerDotted } from 'spinners-react'; 
+import axios from 'axios';
 export default function Orders(props) {
     const { session, user } = props;
     const [orders, setOrders] = useState([]);
     const [ wholesaler, setWholesaler ] = useState(null);
-    const { data, loading } = useQuery(GET_ORDERS, {
-        notifyOnNetworkStatusChange: true,
-        variables: {
-            customerId: session?.user?.databaseId
-        },
-        onCompleted: ()=> {
-            setOrders( data?.orders?.nodes ?? [])
-        }
-    });
+    const [ loading, setLoading ] = useState(false);
     let getRole;
     session?.user?.roles?.nodes.map((r) => {
         getRole = r?.name !== 'customer' ? r?.name : null;
     });
     useEffect(()=> {
+        setLoading( true );
+        axios.post('/api/user/get-orders', {
+            customerId: user?.databaseId
+        }).then((res)=> {
+            const { data, success, error } = res;
+            if( data?.success ) {
+                setOrders( data?.data?.customer?.orders?.nodes );
+            }
+            setLoading( false );
+        })
         if( getRole === 'hairdresser' ) setWholesaler( session?.user?.parentName )
     }, [ session ] );
     return (
@@ -53,11 +54,11 @@ export default function Orders(props) {
                             { wholesaler && <th>Venduto da</th>}
                         </tr>
                     </thead>
-                    <tbody>
+            <tbody>
                 {
                     orders.map( (order, index) => (
                         <tr key={`${order?.orderNumber}-${index}`}>
-                            <td>
+                            <td data-title="Ordine">
                                 <Link href={{
                                     pathname: '/area-clienti/ordine/[id]',
                                     query : {
@@ -67,20 +68,20 @@ export default function Orders(props) {
                                     <a>#{ order?.orderNumber }</a>
                                 </Link>
                             </td>
-                            <td>
+                            <td data-title="Elementi">
                                 { order?.lineItems?.nodes.length }
                             </td>
-                            <td>
+                            <td data-title="Prezzo">
                                 { order?.total }
                             </td>
-                            <td>
+                            <td data-title="Data">
                                 { date( order?.date ) }
                             </td>
-                            <td>
+                            <td data-title="Stato">
                                 { status( order?.status) }
                             </td>
 
-                            { getRole === 'hairdresser' && wholesaler && <td dangerouslySetInnerHTML={{__html:wholesaler}}></td>}
+                            { getRole === 'hairdresser' && wholesaler && <td data-title="Venduto da" dangerouslySetInnerHTML={{__html:wholesaler}}></td>}
                         </tr>
                     ))
                 }

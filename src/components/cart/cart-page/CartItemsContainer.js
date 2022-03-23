@@ -13,7 +13,8 @@ import Title from '../../commons/Title';
 import CartRelated from './CartRelated';
 import FormCoupon from './FormCoupon';
 import CartEmpty from './CartEmpty';
-
+import cx from 'classnames';
+import { SpinnerDotted } from 'spinners-react'; 
 
 const CartItemsContainer = (props) => {
     const title = {
@@ -130,26 +131,9 @@ const CartItemsContainer = (props) => {
             })
         }
     }
-
-    
-
-    // if(!isEmpty(cart.products)) {
-    //     cart.products.map((product) => {
-    //         if( !isEmpty( product?.kits ) && !isNull( product?.kits ) ) {
-    //             product?.node?.kits.map( (kit)=> {
-    //                 kits.push(kit.node.databaseId);
-    //             })
-    //         }
-    //         if( !isEmpty( product?.categories ) && !isNull( product?.kits ) ) {
-    //             product?.categories.map( (cat)=> {
-    //                 categories.push(cat.node.databaseId);
-    //             })
-    //         }
-    //     })
-    // }
-
 	return (
-		<div className="cart">
+        <>
+		<div className={cx('cart', {'cart--loading': updateCartProcessing || loading || clearCartProcessing})}>
 			{ cart ? (
                 <>
                 <div className="columns columns--grow-140-bottom columns--jcc columns--shrink">
@@ -168,17 +152,7 @@ const CartItemsContainer = (props) => {
 					</div>
                     <div className="columns columns--jcsb">
                         <div className="column column--s7-md column--s8-lg">
-                            <table className="table">
-								{ withHead && <thead className="text-left">
-								<tr className="woo-next-cart-head-container">
-									<th className="woo-next-cart-heading-el" scope="col"/>
-									<th className="woo-next-cart-heading-el" scope="col"/>
-									<th className="woo-next-cart-heading-el" scope="col">Product</th>
-									<th className="woo-next-cart-heading-el" scope="col">Price</th>
-									<th className="woo-next-cart-heading-el" scope="col">Quantity</th>
-									<th className="woo-next-cart-heading-el" scope="col">Total</th>
-								</tr>
-								</thead> }
+                            <table className="table table--cart">
 								<tbody>
 								{ cart.products.length && (
 									cart.products.map( item => (
@@ -236,8 +210,10 @@ const CartItemsContainer = (props) => {
 			) : (
 				<CartEmpty />
 			) }
+             
 		</div>
-
+        { (updateCartProcessing || loading || clearCartProcessing) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
+        </>
 	);
 };
 

@@ -50,7 +50,7 @@ export default function CustomersOrders(props) {
                 {
                     orders.map( (order, index) => (
                         <tr key={`${order?.id}-${index}`}>
-                            <td>
+                            <td data-title="Ordine">
                                 <Link href={{
                                     pathname: '/area-clienti/ordine/[id]',
                                     query : {
@@ -60,19 +60,19 @@ export default function CustomersOrders(props) {
                                     <a>#{ order?.id }</a>
                                 </Link>
                             </td>
-                            <td>
+                            <td data-title="Elementi">
                                 { order?.lines }
                             </td>
-                            <td>
+                            <td data-title="Prezzo">
                                 { order?.total }
                             </td>
-                            <td>
+                            <td data-title="Data">
                                 { getDate( order?.date?.date ) }
                             </td>
-                            <td>
+                            <td data-title="Stato">
                                 { status( order?.status) }
                             </td>
-                            <td>
+                            <td data-title="Ordinato da">
                                 <Link href={{
                                     pathname: '/area-clienti/rete/cliente/[id]',
                                     query: {

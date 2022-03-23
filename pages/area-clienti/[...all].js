@@ -54,6 +54,10 @@ export async function getServerSideProps ( context ) {
     
     
     const session = await getSession(context);
+    if( session === null ) {
+        res.setHeader('Location', '/area-clienti');
+        res.statusCode = 302;
+    }
 
     const { data } = await client.query( {
         query : GET_CUSTOMER_GROUP,

@@ -151,6 +151,13 @@ const OrderDiv = ({order, session}) => {
                 display: inline-block;
                 font-size: 16px;
             }
+            @media screen and (max-width: 39.99em) {
+                .order__column {
+                    width: 50%;
+                    padding-top: 10px;
+                    padding-bottom: 10px;
+                }
+            }
             `
         }
         </style>

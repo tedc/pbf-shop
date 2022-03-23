@@ -68,7 +68,7 @@ export default function GroupTable(props) {
                         <tr key={`${client.databaseId}-${index}`}>
                             { columns.map( (th, index)=> {
                                 return (
-                                <td key={`${th.id}-${index}`} data-th={ th.label }>
+                                <td key={`${th.id}-${index}`} data-title={ th.label }>
                                     <Td id={th.id} client={client} />
                                 </td>
                                 )
