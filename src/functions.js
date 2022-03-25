@@ -20,7 +20,7 @@ export const getFloatVal = ( string ) => {
  * @param {Object} product Product
  * @return {{totalProductsCount: number, totalProductsPrice: any, products: Array}}
  */
-export const addFirstProduct = ( product ) => {
+export const addFirstProduct = ( product, qty ) => {
 
 	let productPrice = getFloatVal( product.price );
 
@@ -30,7 +30,7 @@ export const addFirstProduct = ( product ) => {
 		totalProductsPrice: productPrice
 	};
 
-	const newProduct = createNewProduct( product, productPrice, 1 );
+	const newProduct = createNewProduct( product, productPrice, qty );
 	newCart.products.push( newProduct );
 
 	localStorage.setItem( 'woo-next-cart', JSON.stringify( newCart ) );
@@ -197,6 +197,19 @@ export const removeItemFromCart = ( productId ) => {
 	}
 };
 
+
+export const addToCart = (product, qtyToBeAdded)=> {
+    let existingCart = localStorage.getItem( 'woo-next-cart' );
+    console.log( existingCart);
+    let cart;
+    if( existingCart ) {
+        existingCart = JSON.parse(existingCart);
+        cart = updateCart( existingCart, product, qtyToBeAdded);
+    } else {
+        cart = addFirstProduct( product, qtyToBeAdded);
+    }
+    return cart;
+}
 /**
  * Returns cart data in the required format.
  * @param {String} data Cart data

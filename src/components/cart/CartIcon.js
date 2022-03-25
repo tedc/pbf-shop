@@ -9,24 +9,33 @@ import CartItem from './cart-page/CartItem';
 import GET_CART from "../../queries/get-cart";
 import UPDATE_CART from "../../mutations/update-cart";
 import { useMutation, useQuery } from '@apollo/client';
-import { getFormattedCart, getUpdatedItems } from "../../functions";
+import { getFormattedCart, getUpdatedItems, addToCart, removeItemFromCart } from "../../functions";
 import { CSSTransition } from 'react-transition-group';
 import { useSession } from 'next-auth/react';
 import { SpinnerDotted } from 'spinners-react'; 
+import { useRouter } from 'next/router';
 
 const CartIcon = () => {
-	const { cart, setCart, showInCart, setShowInCart, cartLoading, setCartLoading, setMenuVisibility } = useContext( AppContext );
+	const { miniCart, setMiniCart, cart, setCart, showInCart, setShowInCart, cartLoading, setCartLoading, setMenuVisibility } = useContext( AppContext );
     const [ isCartLoading, setIsCartLoading ] = useState( false );
     const {data: session } = useSession();
+    const cartStorage = process?.browser ? window.localStorage.getItem( 'woo-next-cart' ) : null;
+    const router = useRouter();
     
-    const productsCount = ( null !== cart && Object.keys( cart ).length ) ? cart.totalProductsCount : '';
-	const totalPrice = ( null !== cart && Object.keys( cart ).length ) ? cart.totalProductsPrice : '';
+    const productsCount = ( null !== miniCart && Object.keys( miniCart ).length ) ? miniCart.totalProductsCount : '';
+	const totalPrice = ( null !== miniCart && Object.keys( miniCart ).length ) ? miniCart.totalProductsPrice : '';
     const openCart = (event)=> {
         const matchMin = window.matchMedia(`(min-width:48em)`);
         if(matchMin.matches) {
             event.preventDefault();
-            setShowInCart(true);
-            setMenuVisibility( true );
+            if( router?.asPath.indexOf('cart') === -1) {
+                setShowInCart(true);
+                setMenuVisibility( true );
+            }
+        } else {
+            if( router?.asPath.indexOf('cart') !== -1) {
+                event.preventDefault();
+            }
         }
         
     }
@@ -40,10 +49,16 @@ const CartIcon = () => {
         onCompleted: () => {
             // Update cart in the localStorage.
             const updatedCart = getFormattedCart(data);
-            localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
+            if( updatedCart ) {
+                localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
+            } else {
+                localStorage.removeItem('woo-next-cart');
+            }
+            
 
             // Update cart data in React Context.
             setCart(updatedCart);
+            setMiniCart(updatedCart);
             setCartLoading( false );
         }
     });
@@ -58,15 +73,16 @@ const CartIcon = () => {
         },
     } );
 
-    const handleRemoveProductClick = ( event, cartKey, products ) => {
+    const handleRemoveProductClick = ( event, cartKey, products, id ) => {
 
         event.stopPropagation();
         if ( products.length ) {
             setCartLoading( true );
             // By passing the newQty to 0 in updateCart Mutation, it will remove the item.
+            
+            removeItemFromCart( id );
             const newQty = 0;
             const updatedItems = getUpdatedItems( products, newQty, cartKey );
-
             updateCart( {
                 variables: {
                     input: {
@@ -78,9 +94,11 @@ const CartIcon = () => {
         }
     };
 
-    // useEffect(()=> {
-    //     refetch();
-    // }, [ showInCart ])
+    useEffect(()=> {
+        const newCart = JSON.parse(cartStorage);
+        setMiniCart( newCart );
+        setCartLoading( false );
+    }, [ cartStorage ])
 
 	return (
         <div className="banner__cart">
@@ -105,12 +123,12 @@ const CartIcon = () => {
                         <h4 className="title title--font-size-12">Bag
                 { productsCount ? <span> ({ productsCount })</span> : '' }</h4>
                             <>
-                            { cart?.products?.length && (
-                                cart?.products.map( item => (
+                            { miniCart?.products?.length && (
+                                miniCart?.products.map( item => (
                                     <CartItem
                                         key={ item.productId }
                                         item={ item }
-                                        products={ cart.products }
+                                        products={ miniCart?.products }
                                         handleRemoveProductClick={ handleRemoveProductClick }
                                         updateCart={ updateCart }
                                         isMiniCart={ true }

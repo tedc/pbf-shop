@@ -6,7 +6,7 @@ import cx from 'classnames';
 import {ShoppingCart} from '../icons';
 
 import {AppContext} from "../context/AppContext";
-import {getFormattedCart} from "../../functions";
+import {getFormattedCart, addToCart} from "../../functions";
 import GET_CART from "../../queries/get-cart";
 import ADD_TO_CART from "../../mutations/add-to-cart";
 import { useSession } from 'next-auth/react';
@@ -21,7 +21,7 @@ const AddToCart = (props) => {
         quantity: quantity,
     };
 
-    const { cart, setCart,  refetchCart, showInCart, setShowInCart, setCartLoading, setMenuVisibility } = useContext(AppContext);
+    const { setMiniCart, cart, setCart,  refetchCart, showInCart, setShowInCart, setCartLoading, setMenuVisibility } = useContext(AppContext);
     const [requestError, setRequestError] = useState( null );
 
 
@@ -37,10 +37,15 @@ const AddToCart = (props) => {
         onCompleted: () => {
             // Update cart in the localStorage.
             const updatedCart = getFormattedCart(data);
-            localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
+            if( updatedCart ) {
+                localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
+            } else {
+                localStorage.removeItem('woo-next-cart');
+            }
 
             // Update cart data in React Context.
             setCart(updatedCart);
+            setMiniCart(updatedCart);
             setCartLoading(false);
         }
     });
@@ -83,6 +88,7 @@ const AddToCart = (props) => {
         setCartLoading(true);
         productQryInput.quantity = quantity;
         setRequestError(null);
+        addToCart(product, quantity);
         await onAddToCart();
     };
 

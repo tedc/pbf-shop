@@ -25,7 +25,7 @@ const CartItemsContainer = (props) => {
     const categories = [];
     const kits = [];
 	// @TODO wil use it in future variations of the project.
-	const { cart, setCart } = useContext( AppContext );
+	const { cart, setCart, setMiniCart } = useContext( AppContext );
 	const [requestError, setRequestError] = useState( null );
 
 	// Get Cart Data.
@@ -35,15 +35,20 @@ const CartItemsContainer = (props) => {
 
 			// Update cart in the localStorage.
 			const updatedCart = getFormattedCart( data );
-			localStorage.setItem( 'woo-next-cart', JSON.stringify( updatedCart ) );
+            console.log(updatedCart);
+            if( updatedCart ) {
+                localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
+            } else {
+                localStorage.removeItem('woo-next-cart');
+            }
 
 			// Update cart data in React Context.
 			setCart( updatedCart );
+            setMiniCart( updatedCart );
 		}
 	} );
 
-	// Update Cart Mutation.
-	const [updateCart, { data: updateCartResponse, loading: updateCartProcessing, error: updateCartError }] = useMutation( UPDATE_CART, {
+    const [updateCart, { data: updateCartResponse, loading: updateCartProcessing, error: updateCartError }] = useMutation( UPDATE_CART, {
 		onCompleted: () => {
 			refetch();
 		},
@@ -133,7 +138,7 @@ const CartItemsContainer = (props) => {
     }
 	return (
         <>
-		<div className={cx('cart', {'cart--loading': updateCartProcessing || loading || clearCartProcessing})}>
+		<div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing})}>
 			{ cart ? (
                 <>
                 <div className="columns columns--grow-140-bottom columns--jcc columns--shrink">
@@ -212,7 +217,7 @@ const CartItemsContainer = (props) => {
 			) }
              
 		</div>
-        { (updateCartProcessing || loading || clearCartProcessing) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
+        { (updateCartProcessing || clearCartProcessing) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
         </>
 	);
 };

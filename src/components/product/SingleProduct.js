@@ -98,26 +98,26 @@ export default function SingleProduct(props) {
         content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
     } );
 
-    const [ refetchProduct, { loading } ] = useLazyQuery( PRODUCT_BY_SLUG_QUERY, {
-        notifyOnNetworkStatusChange: true,
-        onCompleted: ( data ) => {
+    // const [ refetchProduct, { loading } ] = useLazyQuery( PRODUCT_BY_SLUG_QUERY, {
+    //     notifyOnNetworkStatusChange: true,
+    //     onCompleted: ( data ) => {
             
-            setItem( data?.product ?? {} );
-            setIsLoading( false );
-            setKitProps( {
-                title: 'Kit di lavorazione',
-                products: data?.product?.relatedKit?.edges ?? [],
-                content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
-            })
-            setRelatedProps({
-                title: 'Ti potrebbero interessare',
-                products: data?.product?.related?.edges ?? [],
-                content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
-            } )
-        },
-    } );
+    //         setItem( data?.product ?? {} );
+    //         setIsLoading( false );
+    //         setKitProps( {
+    //             title: 'Kit di lavorazione',
+    //             products: data?.product?.relatedKit?.edges ?? [],
+    //             content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
+    //         })
+    //         setRelatedProps({
+    //             title: 'Ti potrebbero interessare',
+    //             products: data?.product?.related?.edges ?? [],
+    //             content: '<p>Gli utenti che hanno acquistato questo prodotto hanno anche guardato questi prodotti</p>',
+    //         } )
+    //     },
+    // } );
 
-    useEffect( ()=> (async() => {
+    useEffect( () => {
         if( status === 'authenticated') {
             let getRole;
             session?.user?.roles?.nodes.map((r) => {
@@ -135,12 +135,18 @@ export default function SingleProduct(props) {
                 product?.userVisibility.map((uItem)=> {
                     if( uItem?.id === session?.user?.databaseId || uItem?.key === role) {
                         visible = true;
-                        if( uItem?.qty ) {
-                            setItem({
-                                ...item,
-                                stock : uItem?.qty
-                            });
+                        const newItem = {
+                            price: uItem?.price
                         }
+
+                        if( uItem?.stock ) {
+                            newItem.stock = uItem?.stock;
+                        }
+                        console.log( uItem, item, product )
+                        setItem({
+                            ...item,
+                            ...newItem
+                        });
                     }
                 });
                 if(!visible) {
@@ -152,15 +158,16 @@ export default function SingleProduct(props) {
                 if( getRole !== 'wholesaler' && product?.details?.wholesalerProduct ) {
                     router?.push('/');
                 } 
-                await refetchProduct({variables: { slug } });
+                
             } else {
-                setIsLoading( false );
+                
                 if( product?.details?.hideOnB2c) {
                     router?.push('/');
                 }
             }
+            setIsLoading( false );
         }
-    })(), [ status ]);
+    }, [ status ]);
     return (
         <div className={cx('product', 'product--single', { 'product--single-loading' : isLoading})}>
             <Breadcrumbs breadcrumbs={breadcrumbs} name={product?.name}/>

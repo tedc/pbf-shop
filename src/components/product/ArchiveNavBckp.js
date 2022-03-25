@@ -1,6 +1,6 @@
 import { gsap } from 'gsap/dist/gsap';
 import { useEffect, useState, useRef, useContext } from 'react';
-import {isEmpty, isUndefined, isNull, isArray, union} from 'lodash';
+import {isEmpty, isUndefined, isNull, isArray} from 'lodash';
 import {AppContext} from "../context/AppContext";
 import cx from 'classnames';
 import Search from './Search';
@@ -15,7 +15,7 @@ import { productsUrlParams } from '../../utils/product';
 
 const SubNav = (props)=> {
     const router = useRouter();
-    const {items, state, id, show, shrink, parent, ids} = props;
+    const {items, state, id, show, shrink, parent} = props;
     if(isEmpty(items)) {
         return '';
     }
@@ -43,9 +43,6 @@ const SubNav = (props)=> {
         parentQuery = {...parentQuery, ...query};
     }
 
-    let terms = [...items]; 
-    terms = terms.filter( t => ids.indexOf( t?.databaseId ) !== -1 );
-    
     useEffect(()=> {
         if(!show) return;
         const isEl = state === id;
@@ -97,15 +94,16 @@ const SubNav = (props)=> {
             <div className={cx("nav__children", {"nav__children--shrink" : shrink})} ref={navRef} data-subnav={id}>
             <ul>
                 <li>
-                <Link href={{
+                    <Link href={{
                         pathname: '/prodotti',
                         query: parentQuery,
                     }} shallow>
                         <a className={ cx( 'nav__link', {'nav__link--active' : isUndefined(parentQuery[parent]) } ) }>Tutti</a>
                     </Link>
                 </li>
+                <>
                 {
-                    terms.map(function(item, index) {
+                    items.map(function(item, index) {
                         const query = !isEmpty(uparams, true) ? Object.assign({}, uparams) : {};
                         const q = {};   
                         let classname = cx('nav__link');
@@ -143,6 +141,7 @@ const SubNav = (props)=> {
                         )
                     })
                 }
+                </>
             </ul>
             </div>
         )
@@ -151,7 +150,7 @@ const SubNav = (props)=> {
     )
 }
 
-export default function ArchiveNav({categories,searchQuery, setSearchQuery, handleSearchFormSubmit, session, totalItems}) {
+export default function ArchiveNav({categories,searchQuery, setSearchQuery, handleSearchFormSubmit, session}) {
     const [ state, setState ] = useState( null );
     const [ media, setMedia ] = useState( false );
     const [ isNavOpen, setIsNavOpen ] = useState(false);
@@ -165,17 +164,9 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
         size: 'title--font-size-38'
     }} />
 
-
-    let ids = [];
-
-    totalItems?.map((item)=> {
-        ids = union(ids, item?.productCategoriesIds);
-    });
     const [ role, setRole ] = useState( null );
-    let terms = [...categories];
    
-    terms = terms.filter( t => ids.indexOf( t?.databaseId ) !== -1 );
-
+   
     const setNavState = (id)=> {
         const v = state === id ? false : id;
         setState( v )
@@ -222,13 +213,13 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
                 
                 <ul className="nav__list">
                     {
-                        terms.map((category) => {
+                        categories.map((category) => {
                             if(!isEmpty(category.children.nodes) && !isNull(category.children.nodes)) {
                                 return (
                                     <li className={cx('nav__cat', { 'nav__cat--active' : state === category.databaseId})} key={category.databaseId} onClick={() => setNavState(category.databaseId)}>
                                         {category.name}
                                         { !isNull(category.children.nodes) && !isEmpty(category.children.nodes) && <i></i> }
-                                        <SubNav {...{items: category.children.nodes, show: !media, state: state, id: category.databaseId, shrink : false, parent : category.slug, ids }} />
+                                        <SubNav {...{items: category.children.nodes, show: !media, state: state, id: category.databaseId, shrink : false, parent : category.slug }} />
                                     </li>
                                 )
                             } else {
@@ -271,7 +262,7 @@ export default function ArchiveNav({categories,searchQuery, setSearchQuery, hand
             </nav>
             {
                 categories.map((category) => (
-                    <SubNav {...{items: category.children.nodes, show: media, state: state, id: category.databaseId, shrink : true, parent : category.slug, ids }} key={category.databaseId} />
+                    <SubNav {...{items: category.children.nodes, show: media, state: state, id: category.databaseId, shrink : true, parent : category.slug }} key={category.databaseId} />
                 ))
             }
         </div>

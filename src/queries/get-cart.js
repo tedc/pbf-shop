@@ -11,12 +11,9 @@ query GET_CART {
             id
             productId: databaseId
             name
-            description
             type
             onSale
             slug
-            averageRating
-            reviewCount
             kits {
               nodes {
                   databaseId
@@ -34,40 +31,6 @@ query GET_CART {
               altText
               title
             }
-            galleryImages {
-              nodes {
-                id
-                sourceUrl
-                srcSet
-                altText
-                title
-              }
-            }
-          }
-        }
-        variation {
-          node {
-            id
-            variationId: databaseId
-            name
-            description
-            type
-            onSale
-            price
-            regularPrice
-            salePrice
-            image {
-              id
-              sourceUrl
-              srcSet
-              altText
-              title
-            }
-          }
-          attributes {
-            id
-            name
-            value
           }
         }
         quantity

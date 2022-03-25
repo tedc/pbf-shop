@@ -88,9 +88,11 @@ query GET_PRODUCT_ARCHIVE( $uri: String) {
             ...SeoFragment
         }
     }
-    products: products(first:9999) {
+    products: products(first:5000) {
         nodes {
                 ${ProductFragment}
+                totalSales
+                date
             }
         }
     }

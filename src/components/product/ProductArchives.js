@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import {isEmpty, isUndefined, isNull, isEqual} from 'lodash';
+import {isEmpty, isUndefined, isNull, isEqual, filter, intersection, sortBy, chunk, includes, reverse} from 'lodash';
 import { useLazyQuery } from '@apollo/client';
 import {AppContext} from "../context/AppContext";
 import ProductItem from './ProductItem';
@@ -9,17 +9,107 @@ import { useRouter } from 'next/router';
 import {  GET_PRODUCTS } from '../../queries/products/get-products';
 import { productsUrlParams, getQuery } from '../../utils/product';
 import { PER_PAGE_FIRST, totalPagesCount, getPageOffset, PER_PAGE_REST, orders } from '../../utils/pagination';
-import Pagination from './pagination';
+import Pagination from './pagination-new';
 import Title from '../commons/Title';
 import cx from 'classnames';
 import { useSession } from 'next-auth/react';
 import { SpinnerDotted } from 'spinners-react'; 
 import ContentProductLoader from './loaders/ContentProduct';
+
+const FilterProducts = (props)=> {
+    const {
+        setArgs, query, productsData, hideOnB2c, wholesalerProduct, session, role, categoryIds, setIsProductsLoading, setItems, setPageNo, setPagesCount, setTotalItems
+    } = props;
+    setIsProductsLoading( true );
+    let ids = [],
+        items = [...productsData];
+        
+    for(let key in query) {
+        if( key !== 'order' && key !== 'search' && key !== 'page') {
+            const value = query[key].split(',');
+            value.map((item)=> {
+                const v = item === 'all' ? key : item;
+                const current = categoryIds[v];
+                ids.push(current);
+            })      
+        }
+    }
+
+    if( !isEmpty(ids) ) {
+        items =  filter(items, (p)=>  intersection(ids, p?.productCategoriesIds).length > 0 );
+    }
+    if( !hideOnB2c ) {
+        items = filter(items, (p)=> p?.details.hideOnB2c !== true )
+    }
+    
+    items = filter(items, (p)=> p?.details.wholesalerProduct !== !wholesalerProduct)
+
+    if( session ) {
+        if( role !== 'customer') {
+            items = filter(items, (p)=> {
+                let visible = false;
+                p.userVisibility.map((uItem)=> {
+                    if( uItem?.id === session?.user?.databaseId || uItem?.key === role) {
+                        visible = true;
+                    }
+                });
+                return visible;
+            })
+        }
+    }
+
+    if( !isUndefined(query?.search) ) {
+        items = filter(items, (p)=> p?.name?.match(new RegExp(query?.search, "i")) || p?.categoryName?.match(new RegExp(query?.search, "i")))
+    }
+    setTotalItems( items );
+    setPageNo( query?.page ?? 1 );
+    setPagesCount( Math.ceil( ( items?.length - PER_PAGE_FIRST ) / PER_PAGE_REST + 1 ) );
+    if( !isEmpty(items ) ) {
+        if( !isUndefined(query.order) ) {
+            const order = query.order
+            let orderKey = 'date';
+            if( order === 'lower_price' || order === 'higher_price' ) {
+                orderKey = 'price';
+            } else if(order === 'best') {
+                orderKey = 'totalSales'
+            } else if( order === 'az' || order === 'za') {
+                orderKey = 'name';
+            }
+            items = sortBy(items, orderKey);
+            if( order === 'higher_price' || order === 'best' || order === 'za') {
+                items = reverse(items);
+            }
+        }
+        if( items.length > PER_PAGE_FIRST) {
+            items = chunk(items, PER_PAGE_FIRST);
+            if( !isUndefined(query.page) ) {
+                const index = parseInt( query.page ) - 1;
+                items = items[index];
+            } else {
+                items = items[0];
+            }
+        }
+    }
+
+
+    setItems( items );
+    setIsProductsLoading( false );
+    setArgs( query );
+}
+
 const ProdutArchive = function(props) {
-    const { products, categories, params, pageInfo, pageNo } = props;
+    const { products, categories, params, productsData } = props;
     const router = useRouter();
     const { data : session, status } = useSession();
-   
+    const categoryIds = {};
+    categories.map((cat)=> {
+        categoryIds[cat?.slug] = cat?.databaseId;
+        if(!isEmpty(cat?.children?.nodes)) {
+            cat?.children?.nodes?.map((c)=> {
+                categoryIds[c?.slug] = c?.databaseId;
+            })
+        }
+    })
    // const router = useRouter();
     
     let cond = false;
@@ -35,30 +125,16 @@ const ProdutArchive = function(props) {
             }
         }
     });
-
-    for(const order in orders) {
-        if(!isUndefined(uparams.order)) {
-            if(uparams.order === order) {
-                query.order = order;
-                cond = true;
-            }
-        }
-    }
-
-    const totalProductsCount = pageInfo?.offsetPagination?.total ?? 0;
-    const [ pagesCount, setPagesCount ] = useState( Math.ceil( ( totalProductsCount - PER_PAGE_FIRST ) / PER_PAGE_REST + 1 ) );
-
-    const offset = getPageOffset( pageNo );
-
-    where.offsetPagination = { size: PER_PAGE_FIRST, offset: offset };
-
+    const [ totalItems, setTotalItems ] = useState( productsData );
     const [ items, setItems ] = useState( products );
-    const [ args, setArgs ] = useState( where );
+    const totalProductsCount = productsData?.length ?? 0;
+    const [ pagesCount, setPagesCount ] = useState( Math.ceil( ( totalProductsCount - PER_PAGE_FIRST ) / PER_PAGE_REST + 1 ) );
+    const [ pageNo, setPageNo ] = useState(query?.page ?? 1);
+    const [ args, setArgs ] = useState({});
+    
     const [ isProductsLoading, setIsProductsLoading ] = useState( cond );
-    const [ page, setPage ] = useState( pageInfo );
     const [ searchQuery, setSearchQuery ] = useState( '' );
-
-
+    
     const handleSearchFormSubmit = async ( event ) => {
 
         event.preventDefault();
@@ -72,42 +148,49 @@ const ProdutArchive = function(props) {
             }
         }, null, {shallow: true})
         //setIsProductsLoading( false );
-            
     };
 
     useEffect( ()=> (async() => {
-        if ( '1' === pageNo ) {
-            router.push( '/prodotti' );
-        }
+        let getRole,
+            hideOnB2c = false,
+            wholesalerProduct = false;
+             
         if( status === 'authenticated') {
-            let getRole;
             session?.user?.roles?.nodes.map((r) => {
                 getRole = r?.name !== 'customer' ? r?.name : null;
             });
             if( getRole !== 'customer' ) {
-                where.hideOnB2c = true;
+                hideOnB2c = true;
                 if( getRole === 'wholesaler') {
-                    where.wholesalerProduct = true;
+                    wholesalerProduct = true;
                 }
             }
         }
-        if( searchQuery ) {
-            where.search = searchQuery;
+        const filterProps = {query, setArgs, productsData, hideOnB2c, wholesalerProduct, session, getRole, categoryIds, setIsProductsLoading, setItems, setPageNo, setPagesCount, setTotalItems}
+        if( status === 'authenticated' || !isEqual(query, args)) {
+             FilterProducts(filterProps);
         }
-        const condition = !isEqual(where, args) ? !isEqual(where, args) : status !== 'loading' && !isEmpty(router?.query, true);
-        if( condition  ) {
-            if( !isProductsLoading) setIsProductsLoading( true );
-            
+        if ( !isUndefined(query?.page) && query?.page === '1' ) {
+            const q = {
+                ...query
+            }
+            if( !isUndefined(q?.page) ) {
+                delete q?.page;
+            }
+            router.push( { pathname: '/prodotti', query: q}, null, {shallow: true} );
+        }
+        if( items.length === 0 && !isUndefined(query?.page)) {
+            router.push( { pathname: '/prodotti', query: q}, null, {shallow: true} );
         }
     })(), [ query, status ] );
     return (
         <div className={cx('row', 'row--archive') }>
-            <ArchiveNav categories={categories} searchQuery={ searchQuery } setSearchQuery={ setSearchQuery } handleSearchFormSubmit={handleSearchFormSubmit} orders={orders} session={session} /> 
-            <Filters categories={categories} total={page?.offsetPagination?.total} uparams={uparams} />
+            <ArchiveNav categories={categories} totalItems={totalItems} searchQuery={ searchQuery } setSearchQuery={ setSearchQuery } handleSearchFormSubmit={handleSearchFormSubmit} orders={orders} session={session} /> 
+            <Filters categories={categories} total={items.length} uparams={uparams} />
             { isNull(session) || isUndefined(session) ? ( <><div className={cx("columns", "columns--archive", {'columns--archive-loading': isProductsLoading })}>  
                 {!isEmpty(items) ? items.map((product, index)=> (
-                    <div className="column column--s6-sm column--s4-md column--s3-lg"  key={product?.node?.databaseId}>
-                        <ProductItem product={product?.node} /> 
+                    <div className="column column--s6-sm column--s4-md column--s3-lg" key={`${product?.databaseId}-${index}`}>
+                        <ProductItem product={product} /> 
                     </div>
                 ))
                 : (
@@ -124,8 +207,8 @@ const ProdutArchive = function(props) {
                 { (isProductsLoading || (status !== 'unauthenticated' && status !== 'authenticated' ) ) && <ContentProductLoader /> }
                 { !(isProductsLoading || (status !== 'unauthenticated' && status !== 'authenticated' ) ) && <><div className={cx("columns", "columns--archive", {'columns--archive-loading': isProductsLoading })}>  
                     {!isEmpty(items) ? items.map((product, index)=> (
-                        <div className="column column--s6-sm column--s4-md column--s3-lg"  key={product.node.databaseId}>
-                            <ProductItem product={product.node} /> 
+                        <div className="column column--s6-sm column--s4-md column--s3-lg" key={`${product?.databaseId}-${index}`}>
+                            <ProductItem product={product} /> 
                         </div>
                     ))
                     : (

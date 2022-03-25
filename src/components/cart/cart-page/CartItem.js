@@ -1,6 +1,6 @@
 import { useState, useRef, useContext, useEffect } from 'react';
 import { v4 } from "uuid";
-import { getUpdatedItems } from "../../../functions";
+import { getUpdatedItems, addToCart } from "../../../functions";
 import { Loading } from "../../icons";
 import Link from 'next/link';
 import {AppContext} from "../../context/AppContext";
@@ -26,7 +26,7 @@ const CartItem = ( {
 	 *
 	 * @return {void}
 	 */
-	const handleQtyValue = ( event, cartKey ) => {
+	const handleQtyValue = ( event ) => {
         if ( process.browser ) {
 
 			event.stopPropagation();
@@ -48,8 +48,8 @@ const CartItem = ( {
     const updateQtyChange = (v)=> {
         if ( products.length ) {
             setCartLoading( true );
+            addToCart(item, productCount);
             const updatedItems = getUpdatedItems( products, v, item.cartKey );
-
             updateCart( {
                 variables: {
                     input: {
@@ -66,7 +66,7 @@ const CartItem = ( {
             event.stopPropagation();
             let value = productCount + v === 0 ? 1 : productCount + v;
             if(item.stock) {
-                value = productCount + v > item.stock ? item.stock : productCount + v;
+                value = productCount + v > item?.stock ? item?.stock : productCount + v;
             }
             setProductCount(value);
             updateQtyChange(  value  );
@@ -98,7 +98,7 @@ const CartItem = ( {
                                 data-cart-key={ item.cartKey }
                                 max={ item.stock ? item.stock : undefined }
                                 value={ productCount }
-                                onChange={( event ) => handleQtyValue( event, item.cartKey )}
+                                onChange={( event ) => handleQtyValue( event )}
                                 ref={inputBox}
                             /> 
                             <div className="input__mod input__mod--plus" onClick={(event) => handleQtyChange(event, 1)}></div>
@@ -106,7 +106,7 @@ const CartItem = ( {
                         <div className="mini-cart__price">{ ( 'string' !== typeof item.totalPrice ) ? item.totalPrice.toFixed( 2 ) : item.totalPrice }</div>
                     </div>
                     <span className="remove"
-                      onClick={ ( event ) => handleRemoveProductClick( event, item.cartKey, products ) }></span>
+                      onClick={ ( event ) => handleRemoveProductClick( event, item.cartKey, products, item?.productId ) }></span>
                 </div>
             )
         : 
@@ -134,7 +134,7 @@ const CartItem = ( {
                         data-cart-key={ item.cartKey }
                         max={ item.stock ? item.stock : undefined }
                         value={ productCount }
-                        onChange={( event ) => handleQtyValue( event, item.cartKey )}
+                        onChange={( event ) => handleQtyValue( event )}
                         ref={inputBox}
                     /> 
                     <div className="input__mod input__mod--plus" onClick={(event) => handleQtyChange(event, 1)}></div>

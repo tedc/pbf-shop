@@ -10,48 +10,14 @@ const ADD_TO_CART = gql`
               id
               productId: databaseId
               name
-              description
               type
               onSale
               slug
-              averageRating
-              reviewCount
               image {
                 id
                 sourceUrl
                 altText
               }
-              galleryImages {
-                nodes {
-                  id
-                  sourceUrl
-                  altText
-                }
-              }
-            }
-          }
-          variation {
-            node {
-              id
-              variationId: databaseId
-              name
-              description
-              type
-              onSale
-              price
-              regularPrice
-              salePrice
-              image {
-                id
-                sourceUrl
-                altText
-              }
-            }
-            attributes {
-              id
-              attributeId
-              name
-              value
             }
           }
           quantity

@@ -21,6 +21,8 @@ export const PRODUCT_BY_SLUG_QUERY = gql` query Product($slug: ID!) {
         userVisibility {
             id
             role
+            stock
+            price
         }
         seo {
             ...SeoFragment

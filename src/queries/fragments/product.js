@@ -14,6 +14,7 @@ const ProductFragment = `
     userVisibility {
         id
         role
+        price
     }
     categoryName
     details {
