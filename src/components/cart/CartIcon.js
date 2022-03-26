@@ -59,7 +59,6 @@ const CartIcon = () => {
             // Update cart data in React Context.
             setCart(updatedCart);
             setMiniCart(updatedCart);
-            setCartLoading( false );
         }
     });
     const [updateCart, { data: updateCartResponse, loading: updateCartProcessing, error: updateCartError }] = useMutation( UPDATE_CART, {
@@ -69,6 +68,7 @@ const CartIcon = () => {
             }
         },
         onCompleted: () => {
+            setCartLoading( false );
             refetch();
         },
     } );
@@ -97,7 +97,6 @@ const CartIcon = () => {
     useEffect(()=> {
         const newCart = JSON.parse(cartStorage);
         setMiniCart( newCart );
-        setCartLoading( false );
     }, [ cartStorage ])
 
 	return (

@@ -46,7 +46,6 @@ const AddToCart = (props) => {
             // Update cart data in React Context.
             setCart(updatedCart);
             setMiniCart(updatedCart);
-            setCartLoading(false);
         }
     });
 
@@ -68,6 +67,8 @@ const AddToCart = (props) => {
         },
         onCompleted: () => {
             // 2. Show View Cart Button
+            
+            setCartLoading(false);
             refetch({
                 context: {
                     headers: {

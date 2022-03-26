@@ -5,7 +5,7 @@ import cx from 'classnames';
 import {DEFAULT_IMG_URL} from "../constants/urls";
 import styles from "../styles/components/image.module.scss";
 import { useComponentClasses } from "@twocatmoon/nextjs-bem-helpers";
-import {useState} from 'react';
+import {useState, useEffect} from 'react';
 
 /**
  * Image Component.
@@ -60,6 +60,12 @@ const Image = ( props ) => {
     attributes.onLoadingComplete=event => {
         setImageIsLoaded(true)
     }
+
+    useEffect(()=> {
+        return ()=> {
+            setImageIsLoaded( null );
+        } 
+    }, [])
 
     return (
         <div className={cx('image')} style={ imageIsLoaded ? { opacity : 1} : {}}>

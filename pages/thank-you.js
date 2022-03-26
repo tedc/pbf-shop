@@ -50,7 +50,6 @@ const ThankYouContent = () => {
                                 const orderData = getOrderData( data?.order );
                                 setOrder( orderData );
                                 setSessionFetching( false );
-                                console.log( data );
                             })
                         }
                     });
@@ -64,26 +63,8 @@ const ThankYouContent = () => {
                     const orderData = getOrderData( data?.order );
                     setOrder( orderData );
                     setSessionFetching( false );
-                    console.log( data );
                 })
             }
-           
-            // fetchOrder({
-            //     variables : {
-            //         orderId : order_id
-            //     }
-            // })
-            // if (session_id) {
-            //     axios.get(`/api/get-stripe-session/?session_id=${session_id}`)
-            //         .then((response) => {
-            //             setSessionData(response?.data ?? {});
-            //             setSessionFetching(false);
-            //         })
-            //         .catch((error) => {
-            //             console.log(error);
-            //             setSessionFetching(false);
-            //         });
-            // }
         }
 
 

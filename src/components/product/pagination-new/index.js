@@ -15,10 +15,9 @@ const Pagination = ( {postName, pagesCount, pageNo } ) => {
     const query = productsUrlParams(router);
     const currentPageNo = parseInt( pageNo ) || 1;
     const paginationLinks = createPaginationLinks( currentPageNo, pagesCount );
-    console.log( currentPageNo, pagesCount );
     return (
         <>
-        {  paginationLinks.length > 1 ? (
+        {  paginationLinks.length > 1 && pagesCount > 1 ? (
         <div className="pagination pagination--grow-40-top pagination--grow-80-bottom">
 
             <Previous currentPageNo={currentPageNo} postName={postName} query={query}/>

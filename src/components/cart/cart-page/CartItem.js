@@ -1,6 +1,7 @@
 import { useState, useRef, useContext, useEffect } from 'react';
 import { v4 } from "uuid";
 import { getUpdatedItems, addToCart } from "../../../functions";
+import { stringifyPrice } from '../../../utils/cart';
 import { Loading } from "../../icons";
 import Link from 'next/link';
 import {AppContext} from "../../context/AppContext";
@@ -45,10 +46,11 @@ const CartItem = ( {
 		}
 	};
 
-    const updateQtyChange = (v)=> {
+    const updateQtyChange = (v, add)=> {
         if ( products.length ) {
+            if( add === 0 ) return;
             setCartLoading( true );
-            addToCart(item, productCount);
+            addToCart(item, add);
             const updatedItems = getUpdatedItems( products, v, item.cartKey );
             updateCart( {
                 variables: {
@@ -64,12 +66,13 @@ const CartItem = ( {
     const handleQtyChange = (event, v)=> {
         if ( process.browser ) {
             event.stopPropagation();
-            let value = productCount + v === 0 ? 1 : productCount + v;
+            const add = productCount + v === 0 ? 0 : v;
+             let value = productCount + v === 0 ? 1 : productCount + v;
             if(item.stock) {
                 value = productCount + v > item?.stock ? item?.stock : productCount + v;
             }
             setProductCount(value);
-            updateQtyChange(  value  );
+            updateQtyChange(  value, add  );
         }
     }
 
@@ -103,7 +106,7 @@ const CartItem = ( {
                             /> 
                             <div className="input__mod input__mod--plus" onClick={(event) => handleQtyChange(event, 1)}></div>
                         </div>
-                        <div className="mini-cart__price">{ ( 'string' !== typeof item.totalPrice ) ? item.totalPrice.toFixed( 2 ) : item.totalPrice }</div>
+                        <div className="mini-cart__price">{ ( 'string' !== typeof item.totalPrice ) ? stringifyPrice( item.totalPrice.toFixed( 2 ) ) : item.totalPrice }</div>
                     </div>
                     <span className="remove"
                       onClick={ ( event ) => handleRemoveProductClick( event, item.cartKey, products, item?.productId ) }></span>

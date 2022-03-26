@@ -1,5 +1,5 @@
 import { useEffect, useState, useContext } from 'react';
-import {isEmpty, isUndefined, isNull, isEqual, filter, intersection, sortBy, chunk, includes, reverse} from 'lodash';
+import {isEmpty, isUndefined, isNull, isEqual, filter, intersection, orderBy, chunk, includes, reverse} from 'lodash';
 import { useLazyQuery } from '@apollo/client';
 import {AppContext} from "../context/AppContext";
 import ProductItem from './ProductItem';
@@ -67,7 +67,8 @@ const FilterProducts = (props)=> {
     if( !isEmpty(items ) ) {
         if( !isUndefined(query.order) ) {
             const order = query.order
-            let orderKey = 'date';
+            let orderKey = 'date',
+                dir = 'asc';
             if( order === 'lower_price' || order === 'higher_price' ) {
                 orderKey = 'price';
             } else if(order === 'best') {
@@ -75,10 +76,16 @@ const FilterProducts = (props)=> {
             } else if( order === 'az' || order === 'za') {
                 orderKey = 'name';
             }
-            items = sortBy(items, orderKey);
+
             if( order === 'higher_price' || order === 'best' || order === 'za') {
-                items = reverse(items);
+                dir = 'desc';
             }
+            if( orderKey == 'price' ) {
+                items = orderBy(items, o => parseFloat( o?.price?.replace('€', '') ), dir);
+            } else {
+                items = orderBy(items, orderKey, dir );
+            }
+            
         }
         if( items.length > PER_PAGE_FIRST) {
             items = chunk(items, PER_PAGE_FIRST);
@@ -140,11 +147,19 @@ const ProdutArchive = function(props) {
         event.preventDefault();
         //setIsProductsLoading( true );
 
+        const q = {...query};
+        if( !isEmpty(searchQuery) ) {
+            q?.search = searchQuery;
+        } else {
+            if( !isUndefined(q?.search) ) {
+                delete q.search;
+            }
+        }
+
         router?.push({
             pathname: '/prodotti',
             query: {
-                ...query,
-                search: searchQuery
+                ...q
             }
         }, null, {shallow: true})
         //setIsProductsLoading( false );
@@ -170,14 +185,15 @@ const ProdutArchive = function(props) {
         if( status === 'authenticated' || !isEqual(query, args)) {
              FilterProducts(filterProps);
         }
-        if ( !isUndefined(query?.page) && query?.page === '1' ) {
+        if ( !isUndefined(query?.page) ) {
             const q = {
                 ...query
             }
-            if( !isUndefined(q?.page) ) {
+            if( q?.page === '1' ) {
                 delete q?.page;
+                router.push( { pathname: '/prodotti', query: q}, null, {shallow: true} );
             }
-            router.push( { pathname: '/prodotti', query: q}, null, {shallow: true} );
+            
         }
         if( items.length === 0 && !isUndefined(query?.page)) {
             router.push( { pathname: '/prodotti', query: q}, null, {shallow: true} );
@@ -186,7 +202,7 @@ const ProdutArchive = function(props) {
     return (
         <div className={cx('row', 'row--archive') }>
             <ArchiveNav categories={categories} totalItems={totalItems} searchQuery={ searchQuery } setSearchQuery={ setSearchQuery } handleSearchFormSubmit={handleSearchFormSubmit} orders={orders} session={session} /> 
-            <Filters categories={categories} total={items.length} uparams={uparams} />
+            <Filters categories={categories} total={totalItems.length} uparams={uparams} />
             { isNull(session) || isUndefined(session) ? ( <><div className={cx("columns", "columns--archive", {'columns--archive-loading': isProductsLoading })}>  
                 {!isEmpty(items) ? items.map((product, index)=> (
                     <div className="column column--s6-sm column--s4-md column--s3-lg" key={`${product?.databaseId}-${index}`}>

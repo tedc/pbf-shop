@@ -65,7 +65,6 @@ const OrderDiv = ({order, session}) => {
     }  
     useEffect(()=> {
         if( getRole === 'hairdresser') setWholesaler( session?.user?.parentName );
-        console.log( order )
     }, [ session, method ] );
     return (
         <>

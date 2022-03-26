@@ -199,8 +199,9 @@ export const removeItemFromCart = ( productId ) => {
 
 
 export const addToCart = (product, qtyToBeAdded)=> {
+    if( qtyToBeAdded === 0) return;
+
     let existingCart = localStorage.getItem( 'woo-next-cart' );
-    console.log( existingCart);
     let cart;
     if( existingCart ) {
         existingCart = JSON.parse(existingCart);

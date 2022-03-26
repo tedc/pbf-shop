@@ -25,7 +25,7 @@ const CartItemsContainer = (props) => {
     const categories = [];
     const kits = [];
 	// @TODO wil use it in future variations of the project.
-	const { cart, setCart, setMiniCart } = useContext( AppContext );
+	const { miniCart, cart, setCart, setMiniCart } = useContext( AppContext );
 	const [requestError, setRequestError] = useState( null );
 
 	// Get Cart Data.
@@ -35,7 +35,6 @@ const CartItemsContainer = (props) => {
 
 			// Update cart in the localStorage.
 			const updatedCart = getFormattedCart( data );
-            console.log(updatedCart);
             if( updatedCart ) {
                 localStorage.setItem('woo-next-cart', JSON.stringify(updatedCart));
             } else {
@@ -119,10 +118,11 @@ const CartItemsContainer = (props) => {
 			},
 		} );
 	}
+    const currentCart = cart ?? miniCart;
 
-    if(!isEmpty(cart)) {
-        if(!isEmpty(cart.products)) {
-            cart.products.map((product) => {
+    if(!isEmpty(currentCart)) {
+        if(!isEmpty(currentCart.products)) {
+            currentCart.products.map((product) => {
                 if( !isEmpty( product?.kits ) && !isNull( product?.kits ) ) {
                     product?.node?.kits.map( (kit)=> {
                         kits.push(kit.databaseId);
@@ -139,7 +139,7 @@ const CartItemsContainer = (props) => {
 	return (
         <>
 		<div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing})}>
-			{ cart ? (
+			{ currentCart ? (
                 <>
                 <div className="columns columns--grow-140-bottom columns--jcc columns--shrink">
                     <div className="column column--s10-lg">
@@ -159,8 +159,8 @@ const CartItemsContainer = (props) => {
                         <div className="column column--s7-md column--s8-lg">
                             <table className="table table--cart">
 								<tbody>
-								{ cart.products.length && (
-									cart.products.map( item => (
+								{ currentCart.products.length && (
+									currentCart.products.map( item => (
 										<CartItem
 											key={ item.productId }
 											item={ item }
@@ -177,25 +177,25 @@ const CartItemsContainer = (props) => {
 
 						{/*Cart Total*/ }
                         <div className="column column--s4-md column--s3-lg">
-                            <FormCoupon cart={cart} setRequestError={setRequestError} refetch={refetch} />
+                            <FormCoupon cart={currentCart} setRequestError={setRequestError} refetch={refetch} />
     						<div className="cart__summary">
                                 <h4 className="title title--font-size-14 title--font-family-secondary title--normal title---grow-30-bottom">
                                     Riepilogo ordine
                                 </h4>
                                 <div className="cart__row">
                                     SubTotale
-                                    <span>{ ( 'string' !== typeof cart?.subtotal ) ? cart?.subtotal.toFixed(2) : cart?.subtotal }</span>
+                                    <span>{ ( 'string' !== typeof currentCart?.subtotal ) ? currentCart?.subtotal.toFixed(2) : currentCart?.subtotal }</span>
                                 </div>
                                 <div className="cart__row">
                                     Spedizione
-                                    { !isNull(cart?.shippingTotal) && !isEmpty(cart?.shippingTotal) && !isUndefined(cart?.shippingTotal) && parseInt(cart?.shippingTotal) > 0 ? (
-                                        <span>{ ( 'string' !== typeof cart?.shippingTotal ) ? cart?.shippingTotal.toFixed(2) : cart?.shippingTotal }</span>
+                                    { !isNull(cart?.shippingTotal) && !isEmpty(currentCart?.shippingTotal) && !isUndefined(currentCart?.shippingTotal) && parseInt(currentCart?.shippingTotal) > 0 ? (
+                                        <span>{ ( 'string' !== typeof currentCart?.shippingTotal ) ? currentCart?.shippingTotal.toFixed(2) : currentCart?.shippingTotal }</span>
                                     ) : (<span>Gratuita</span>)}
                                 </div>
                                     {/* <h2 className="text-2xl">Cart Total</h2> */}
                                 <div className="cart__total">
                                     Totale (iva inc.)
-                                    <strong>{ ( 'string' !== typeof cart.totalProductsPrice ) ? cart.totalProductsPrice.toFixed(2) : cart.totalProductsPrice }</strong>
+                                    <strong>{ ( 'string' !== typeof currentCart.totalProductsPrice ) ? currentCart.totalProductsPrice.toFixed(2) : currentCart.totalProductsPrice }</strong>
                                 </div>
                                 <Link href="/checkout">
                                     <a className="button button--bg-black button--rounded">

@@ -93,7 +93,6 @@ export default function Register(props) {
             error,
         } = data;
         
-        console.log( data )
         if( success ) {
             if( !isEmpty(input?.password) && input?.role === 'customer' ) {
                 return signIn('credentials', {
@@ -145,7 +144,6 @@ export default function Register(props) {
 
         setIsRegisterSent( success );
         if( success ) {
-            console.log( message, )
             setSuccessMessage( message );
         } else {
             setErrorMessage( error );
