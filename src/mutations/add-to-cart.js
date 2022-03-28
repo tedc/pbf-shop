@@ -18,6 +18,14 @@ const ADD_TO_CART = gql`
                 sourceUrl
                 altText
               }
+              userVisibility {
+                id
+                role
+              }
+              details {
+                wholesalerProduct
+                hideOnB2c
+              }
             }
           }
           quantity

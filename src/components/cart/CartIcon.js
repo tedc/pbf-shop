@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from 'react';
 import { AppContext } from "../context/AppContext";
 import Link from 'next/link';
-import { isEmpty, isUndefined } from 'lodash';
+import { isEmpty, isUndefined, isNull } from 'lodash';
 import { v4 } from 'uuid';
 import cx from 'classnames';
 import {ShoppingCart} from '../icons';
@@ -16,9 +16,8 @@ import { SpinnerDotted } from 'spinners-react';
 import { useRouter } from 'next/router';
 
 const CartIcon = () => {
-	const { miniCart, setMiniCart, cart, setCart, showInCart, setShowInCart, cartLoading, setCartLoading, setMenuVisibility } = useContext( AppContext );
-    const [ isCartLoading, setIsCartLoading ] = useState( false );
-    const {data: session } = useSession();
+	const { cartFetching, miniCart, setMiniCart, cart, setCart, showInCart, setShowInCart, cartLoading, setCartLoading, setMenuVisibility } = useContext( AppContext );
+    const {data: session, status } = useSession();
     const cartStorage = process?.browser ? window.localStorage.getItem( 'woo-next-cart' ) : null;
     const router = useRouter();
     
@@ -39,7 +38,49 @@ const CartIcon = () => {
         }
         
     }
-    const {data, refetch} = useQuery(GET_CART, {
+
+    const cleanCart = (cart)=> {
+        if( isNull(cart) ) return;
+        if( status === 'loading') return;
+        const { products } = cart;
+        if( status === 'authenticated' ) {
+            let role;
+            session?.user?.roles?.nodes.map((r) => {
+                role = r?.name !== 'customer' ? r?.name : null;
+            });
+            if( role !== 'customer') {
+                products?.map((product)=> {
+                    if( product?.userVisibility ) {
+                        let visible = false;
+                        product?.userVisibility.map((uItem)=> {
+                            if( uItem?.id === session?.user?.databaseId || uItem?.key == role) {
+                                visible = true;
+                            }
+                        });
+                        if( !visible ) {
+                            removeProduct(product?.cartKey, products, product?.databaseId);
+                        }
+                    } else {
+                        removeProduct(product?.cartKey, products, product?.databaseId);
+                    }
+                })
+            } else {
+                products?.map((product)=> {
+                    if( product?.wholesalerProduct || products?.hideOnB2c ) {
+                        removeProduct(product?.cartKey, products, product?.databaseId);
+                    }
+                })
+            }
+            
+        } else {
+            products?.map((product)=> {
+                if( product?.wholesalerProduct || product?.hideOnB2c ) {
+                    removeProduct(product?.cartKey, products, product?.databaseId);
+                }
+            })
+        }
+    }
+    const {data, refetch, loading: getCartLoading} = useQuery(GET_CART, {
         notifyOnNetworkStatusChange: true,
         context: {
             headers: {
@@ -59,6 +100,8 @@ const CartIcon = () => {
             // Update cart data in React Context.
             setCart(updatedCart);
             setMiniCart(updatedCart);
+
+            cleanCart( updatedCart );
         }
     });
     const [updateCart, { data: updateCartResponse, loading: updateCartProcessing, error: updateCartError }] = useMutation( UPDATE_CART, {
@@ -72,10 +115,14 @@ const CartIcon = () => {
             refetch();
         },
     } );
-
     const handleRemoveProductClick = ( event, cartKey, products, id ) => {
+        if(updateCartProcessing || cartFetching || getCartLoading) return;
 
         event.stopPropagation();
+        removeProduct( cartKey, products, id);
+    };
+
+    const removeProduct = (cartKey, products, id)=> {
         if ( products.length ) {
             setCartLoading( true );
             // By passing the newQty to 0 in updateCart Mutation, it will remove the item.
@@ -92,12 +139,13 @@ const CartIcon = () => {
                 },
             } );
         }
-    };
+    }
 
     useEffect(()=> {
         const newCart = JSON.parse(cartStorage);
         setMiniCart( newCart );
-    }, [ cartStorage ])
+        setCartLoading( false );
+    }, [ cartStorage, status ])
 
 	return (
         <div className="banner__cart">
@@ -131,6 +179,7 @@ const CartIcon = () => {
                                         handleRemoveProductClick={ handleRemoveProductClick }
                                         updateCart={ updateCart }
                                         isMiniCart={ true }
+                                        updateCartProcessing={updateCartProcessing || getCartLoading}
                                     />
                                 ) )
                             ) } 

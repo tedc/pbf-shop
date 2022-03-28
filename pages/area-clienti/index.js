@@ -1,12 +1,11 @@
 import Layout from "../../src/components/Layout";
 import Seo from "../../src/components/seo";
 import GET_COUNTRIES from "../../src/queries/get-countries";
-import client from "../../src/components/ApolloClient";
 import { GET_MENUS } from '../../src/queries/get-menus';
 import Wrapper from '../../src/components/area-clienti/Wrapper';
 import AccountForm from '../../src/components/area-clienti/AccountForm';
 import { getSession } from 'next-auth/react';
-import { GET_CUSTOMER_GROUP } from '../../src/queries/users/get-user';
+import getCustomerArea from '../../lib/customer-area';
 export default function AreaPage(props) {
     const pageProps = {...props, current: 'dashboard'};
     return (
@@ -24,19 +23,8 @@ export async function getServerSideProps ( context ) {
     const { params, req, res } = context || {};
     
     const session = await getSession(context);
-
-    const { data } = await client.query( {
-        query : GET_CUSTOMER_GROUP,
-        variables: {
-            parent : session?.user?.databaseId
-        },
-        context: {
-            headers: {
-                'authorization' : session?.accessToken ? `Bearer ${session?.accessToken}`: '',
-            }
-        }
-    });
     
+    const data = await getCustomerArea(session);
 
     const seo = {
         title: 'Area clienti | Professional By Fama',

@@ -4,7 +4,6 @@ import client from '../src/components/ApolloClient';
 import {PAGE_BY_URI} from '../src/queries/page/get-page';
 import {GET_PAGES_URI} from '../src/queries/page/get-pages';
 import { GET_PRODUCTS_BLOCKS } from '../src/queries/products/get-products';
-import { GET_MENUS } from '../src/queries/get-menus';
 import Page from '../src/components/Page';
 import { isEmpty, isArray, isUndefined } from 'lodash';
 import {FALLBACK, isCustomPageUri} from '../src/utils/pages';

@@ -57,6 +57,7 @@ export const createNewProduct = ( product, productPrice, qty ) => {
         kits: product?.kits?.nodes,
         categories: product?.productCategories?.nodes,
 		qty,
+        userVisibility: product?.userVisibility,
 		totalPrice: parseFloat( ( productPrice * qty ).toFixed( 2 ) )
 	};
 
@@ -250,7 +251,9 @@ export const getFormattedCart = ( data ) => {
 			title: givenProduct?.image?.title ?? '',
 			altText: givenProduct?.image?.altText ?? ''
 		};
-
+        product.userVisibility = givenProduct?.userVisibility;
+        product.hideOnB2c = givenProduct?.details?.hideOnB2c;
+        product.wholesalerProduct = givenProduct?.details?.wholesalerProduct;
 		totalProductsCount += givenProducts?.[ i ]?.quantity;
 
 		// Push each item into the products array.

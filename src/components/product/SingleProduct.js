@@ -156,13 +156,16 @@ export default function SingleProduct(props) {
             setRole( getRole );
             if(  getRole !== 'customer' ) {
                 if( getRole !== 'wholesaler' && product?.details?.wholesalerProduct ) {
-                    router?.push('/');
-                } 
+                    router?.push('/prodotti');
+                }
+                if( isNull( product?.userVisibility) ) {
+                    router.push('/prodotti')
+                }
                 
             } else {
                 
                 if( product?.details?.hideOnB2c) {
-                    router?.push('/');
+                    router?.push('/prodotti');
                 }
             }
             setIsLoading( false );

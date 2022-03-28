@@ -2,7 +2,6 @@ import Layout from "../src/components/Layout";
 import CheckoutForm from "../src/components/checkout/CheckoutForm";
 import GET_COUNTRIES from "../src/queries/get-countries";
 import client from "../src/components/ApolloClient";
-import { GET_MENUS } from '../src/queries/get-menus';
 import {PAGE_BY_URI} from '../src/queries/page/get-page';
 import { GET_GATEWAYS } from '../src/queries/get-gateways';
 import Seo from '../src/components/seo';

@@ -48,11 +48,13 @@ const FilterProducts = (props)=> {
         if( role !== 'customer') {
             items = filter(items, (p)=> {
                 let visible = false;
-                p.userVisibility.map((uItem)=> {
-                    if( uItem?.id === session?.user?.databaseId || uItem?.key === role) {
-                        visible = true;
-                    }
-                });
+                if( p?.userVisibility) {
+                    p?.userVisibility.map((uItem)=> {
+                        if( uItem?.id === session?.user?.databaseId || uItem?.key === role) {
+                            visible = true;
+                        }
+                    });
+                }
                 return visible;
             })
         }
@@ -183,6 +185,7 @@ const ProdutArchive = function(props) {
         }
         const filterProps = {query, setArgs, productsData, hideOnB2c, wholesalerProduct, session, getRole, categoryIds, setIsProductsLoading, setItems, setPageNo, setPagesCount, setTotalItems}
         if( status === 'authenticated' || !isEqual(query, args)) {
+            window.scrollTo(0, 0);
              FilterProducts(filterProps);
         }
         if ( !isUndefined(query?.page) ) {

@@ -15,6 +15,7 @@ import FormCoupon from './FormCoupon';
 import CartEmpty from './CartEmpty';
 import cx from 'classnames';
 import { SpinnerDotted } from 'spinners-react'; 
+import { CSSTransition } from 'react-transition-group';
 
 const CartItemsContainer = (props) => {
     const title = {
@@ -120,9 +121,12 @@ const CartItemsContainer = (props) => {
 	}
     const currentCart = cart ?? miniCart;
 
+
+    console.log( !isNull(currentCart ) && !isEmpty(currentCart) )
+
     if(!isEmpty(currentCart)) {
-        if(!isEmpty(currentCart.products)) {
-            currentCart.products.map((product) => {
+        if(!isEmpty(currentCart?.products)) {
+            currentCart?.products.map((product) => {
                 if( !isEmpty( product?.kits ) && !isNull( product?.kits ) ) {
                     product?.node?.kits.map( (kit)=> {
                         kits.push(kit.databaseId);
@@ -138,47 +142,46 @@ const CartItemsContainer = (props) => {
     }
 	return (
         <>
-		<div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing})}>
-			{ currentCart ? (
-                <>
+            { currentCart && <div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing || loading})}>
                 <div className="columns columns--grow-140-bottom columns--jcc columns--shrink">
                     <div className="column column--s10-lg">
-				    <div className="header">
-						<Title title={title} />
-						{/*Clear entire cart
-						<div className="clear-cart text-right">
-							<button className="px-4 py-1 bg-gray-500 text-white rounded-sm w-auto" onClick={ ( event ) => handleClearCart( event ) } disabled={ clearCartProcessing }>
-								<span className="woo-next-cart">Clear Cart</span>
-								<i className="fa fa-arrow-alt-right"/>
-							</button>
-							{ clearCartProcessing ? <p>Sto cancellando...</p> : '' }
-							{ updateCartProcessing || applyCouponProcessing ? <p>In aggiornamento...</p> : null }
-						</div>*/}
-					</div>
+                    <div className="header">
+                        <Title title={title} />
+                        {/*Clear entire cart
+                        <div className="clear-cart text-right">
+                            <button className="px-4 py-1 bg-gray-500 text-white rounded-sm w-auto" onClick={ ( event ) => handleClearCart( event ) } disabled={ clearCartProcessing }>
+                                <span className="woo-next-cart">Clear Cart</span>
+                                <i className="fa fa-arrow-alt-right"/>
+                            </button>
+                            { clearCartProcessing ? <p>Sto cancellando...</p> : '' }
+                            { updateCartProcessing || applyCouponProcessing ? <p>In aggiornamento...</p> : null }
+                        </div>*/}
+                    </div>
                     <div className="columns columns--jcsb">
                         <div className="column column--s7-md column--s8-lg">
                             <table className="table table--cart">
-								<tbody>
-								{ currentCart.products.length && (
-									currentCart.products.map( item => (
-										<CartItem
-											key={ item.productId }
-											item={ item }
-											updateCartProcessing={ updateCartProcessing }
-											products={ cart.products }
-											handleRemoveProductClick={ handleRemoveProductClick }
-											updateCart={ updateCart }
-										/>
-									) )
-								) }
-								</tbody>
-							</table>
+                                <tbody>
+                                { currentCart?.products?.length && (
+                                    currentCart?.products.map( item => (
+                                        <CartItem
+                                            key={ item.productId }
+                                            item={ item }
+                                            updateCartProcessing={ updateCartProcessing }
+                                            products={ cart.products }
+                                            handleRemoveProductClick={ handleRemoveProductClick }
+                                            updateCart={ updateCart }
+                                            updateCartProcessing={updateCartProcessing}
+                                        />
+                                    ) )
+                                ) }
+                                </tbody>
+                            </table>
                         </div>
 
-						{/*Cart Total*/ }
+                        {/*Cart Total*/ }
                         <div className="column column--s4-md column--s3-lg">
                             <FormCoupon cart={currentCart} setRequestError={setRequestError} refetch={refetch} />
-    						<div className="cart__summary">
+                            <div className="cart__summary">
                                 <h4 className="title title--font-size-14 title--font-family-secondary title--normal title---grow-30-bottom">
                                     Riepilogo ordine
                                 </h4>
@@ -188,36 +191,52 @@ const CartItemsContainer = (props) => {
                                 </div>
                                 <div className="cart__row">
                                     Spedizione
-                                    { !isNull(cart?.shippingTotal) && !isEmpty(currentCart?.shippingTotal) && !isUndefined(currentCart?.shippingTotal) && parseInt(currentCart?.shippingTotal) > 0 ? (
+                                    { !isNull(currentCart?.shippingTotal) && !isEmpty(currentCart?.shippingTotal) && !isUndefined(currentCart?.shippingTotal) && parseInt(currentCart?.shippingTotal) > 0 ? (
                                         <span>{ ( 'string' !== typeof currentCart?.shippingTotal ) ? currentCart?.shippingTotal.toFixed(2) : currentCart?.shippingTotal }</span>
                                     ) : (<span>Gratuita</span>)}
                                 </div>
                                     {/* <h2 className="text-2xl">Cart Total</h2> */}
                                 <div className="cart__total">
                                     Totale (iva inc.)
-                                    <strong>{ ( 'string' !== typeof currentCart.totalProductsPrice ) ? currentCart.totalProductsPrice.toFixed(2) : currentCart.totalProductsPrice }</strong>
+                                    <strong>{ ( 'string' !== typeof currentCart?.totalProductsPrice ) ? currentCart?.totalProductsPrice.toFixed(2) : currentCart?.totalProductsPrice }</strong>
                                 </div>
                                 <Link href="/checkout">
                                     <a className="button button--bg-black button--rounded">
                                         Procedi con il pagamento
                                     </a>
                                 </Link>
-    						</div>
+                            </div>
                         </div>
 
-					{/* Display Errors if any */}
-					{ requestError ? <div className="row woo-next-cart-total-container mt-5"> { requestError } </div> : '' }
+                    {/* Display Errors if any */}
+                    { requestError ? <div className="row woo-next-cart-total-container mt-5"> { requestError } </div> : '' }
                     </div>
                     </div>
-				</div>
+                </div>
                 <CartRelated {...{categories, kits}} />
-                </>
-			) : (
-				<CartEmpty />
-			) }
-             
-		</div>
-        { (updateCartProcessing || clearCartProcessing) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
+                </div>
+            }
+            <CSSTransition in={ isNull( currentCart ) || isEmpty( currentCart ) } classNames="fade-in" timeout={350} unmountOnExit>
+            <div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing || loading})}>
+                <CartEmpty />
+            </div>
+            </CSSTransition> 
+            { (updateCartProcessing || clearCartProcessing || loading) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
+            <style jsx>{
+                `.fade-in-enter {
+                    opacity: 0;
+                }
+                .fade-in-enter-active {
+                    transition: opacity .35s;
+                }
+                .fade-in-exit {
+                    opacity: 1;
+                }
+                .fade-in-exit-active {
+                    opacity: 0;
+                    transition: opacity .35s;
+                }`
+            }</style>   
         </>
 	);
 };

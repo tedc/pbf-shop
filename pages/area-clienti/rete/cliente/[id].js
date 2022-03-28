@@ -10,6 +10,7 @@ import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import { getSession } from 'next-auth/react';
 import { GET_CUSTOMER_GROUP } from '../../../../src/queries/users/get-user';
+import getCustomerArea from '../../../../lib/customer-area';
 export default function AreaPage(props) {
     const pageProps = {...props, current: 'dashboard'};
     const { params } = props;
@@ -30,18 +31,7 @@ export async function getServerSideProps ( context ) {
         res.setHeader('Location', '/area-clienti');
         res.statusCode = 302;
     }
-
-    const { data } = await client.query( {
-        query : GET_CUSTOMER_GROUP,
-        variables: {
-            parent : session?.user?.databaseId
-        },
-        context: {
-            headers: {
-                'authorization' : session?.accessToken ? `Bearer ${session?.accessToken}`: '',
-            }
-        }
-    });
+    const data = await getCustomerArea(session);
 
     const seo = {
         title: 'Area clienti | Professional By Fama',

@@ -3,7 +3,6 @@ import { useRouter } from 'next/router';
 import client from '../src/components/ApolloClient';
 import {PAGE_BY_URI} from '../src/queries/page/get-page';
 import {GET_PRODUCTS, GET_PRODUCTS_BLOCKS} from '../src/queries/products/get-products';
-import { GET_MENUS } from '../src/queries/get-menus';
 import Page from '../src/components/Page';
 import { isEmpty, isArray, isUndefined } from 'lodash';
 

@@ -16,7 +16,7 @@ const CartItem = ( {
                    } ) => {
 
 	const [productCount, setProductCount] = useState( 0 );
-    const { setCartLoading } = useContext(AppContext);
+    const { setCartLoading, cartFetching } = useContext(AppContext);
     const inputBox = useRef();
 
 	/*
@@ -33,7 +33,7 @@ const CartItem = ( {
 			event.stopPropagation();
 
 			// If the previous update cart mutation request is still processing, then return.
-			if ( updateCartProcessing ) {
+			if ( updateCartProcessing || cartFetching ) {
 				return;
 			}
 
@@ -64,6 +64,9 @@ const CartItem = ( {
     }
 
     const handleQtyChange = (event, v)=> {
+        if ( updateCartProcessing || cartFetching ) {
+            return;
+        }
         if ( process.browser ) {
             event.stopPropagation();
             const add = productCount + v === 0 ? 0 : v;

@@ -15,6 +15,7 @@ export const AppProvider = ( props ) => {
     const [ showInCart, setShowInCart ] = useState( false );
     const [ cartLoading, setCartLoading ] = useState( false );
     const [ showLogin, setShowLogin ] = useState(false);
+    const [ cartFetching, setCartFetching] = useState( false );
     const [ session, setSession ] = useState( null );
     const [ isMenuVisible, setMenuVisibility ] = useState(false);
     const getVh = ()=> {
@@ -61,7 +62,7 @@ export const AppProvider = ( props ) => {
 	}, [] );
 
 	return (
-		<AppContext.Provider value={ { miniCart, setMiniCart, cart, setCart, showInCart, setShowInCart, showLogin, setShowLogin, session, setSession, cartLoading, setCartLoading, isMenuVisible, setMenuVisibility } }>
+		<AppContext.Provider value={ { cartFetching, setCartFetching, miniCart, setMiniCart, cart, setCart, showInCart, setShowInCart, showLogin, setShowLogin, session, setSession, cartLoading, setCartLoading, isMenuVisible, setMenuVisibility } }>
 			{ props.children }
 		</AppContext.Provider>
 	);

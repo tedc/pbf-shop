@@ -24,6 +24,14 @@ mutation UPDATE_CART($input: UpdateItemQuantitiesInput!) {
             sourceUrl
             altText
           }
+          userVisibility {
+            id
+            role
+          }
+          details {
+            wholesalerProduct
+            hideOnB2c
+          }
         }
       }
       quantity

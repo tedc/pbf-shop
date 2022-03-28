@@ -6,7 +6,7 @@ import { validateAndSanitizeAccountForm } from '../../validator/user';
 import { useState, useContext, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { signIn } from 'next-auth/react';
-import cx from 'classnames'
+import cx from 'classnames';
 
 export default function AccountForm(props) {
     const user =  props?.session?.user;

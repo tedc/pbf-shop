@@ -31,6 +31,14 @@ query GET_CART {
               altText
               title
             }
+            userVisibility {
+                id
+                role
+            }
+            details {
+                wholesalerProduct
+                hideOnB2c
+              }
           }
         }
         quantity

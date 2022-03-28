@@ -21,7 +21,7 @@ const AddToCart = (props) => {
         quantity: quantity,
     };
 
-    const { setMiniCart, cart, setCart,  refetchCart, showInCart, setShowInCart, setCartLoading, setMenuVisibility } = useContext(AppContext);
+    const { setCartFetching, setMiniCart, cart, setCart,  refetchCart, showInCart, setShowInCart, setCartLoading, setMenuVisibility } = useContext(AppContext);
     const [requestError, setRequestError] = useState( null );
 
 
@@ -46,6 +46,7 @@ const AddToCart = (props) => {
             // Update cart data in React Context.
             setCart(updatedCart);
             setMiniCart(updatedCart);
+            setCartFetching( false );
         }
     });
 
@@ -67,8 +68,6 @@ const AddToCart = (props) => {
         },
         onCompleted: () => {
             // 2. Show View Cart Button
-            
-            setCartLoading(false);
             refetch({
                 context: {
                     headers: {
@@ -87,9 +86,11 @@ const AddToCart = (props) => {
         setMenuVisibility( true );
         setShowInCart( true );
         setCartLoading(true);
+        setCartFetching( true );
         productQryInput.quantity = quantity;
         setRequestError(null);
         addToCart(product, quantity);
+        setCartLoading( false );
         await onAddToCart();
     };
 

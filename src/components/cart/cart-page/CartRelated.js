@@ -74,21 +74,10 @@ export default function CartRelated(props) {
     }
     const loop = related.length === 1 || related.length < 3 ? false : true;
 
-        
     useEffect( ()=> {
         refetch();
-        // (async()=> {
-        //     await fetchPosts({
-        //         variables: {
-        //             query: where
-        //         }
-        //     })
-        // })();       
-        // swiperRef.current.swiper.navigation.update( );
     }, [ tab ] );
-    // if( isEmpty( categories ) && isEmpty( kits ) ) {
-    //     return '';
-    // }
+
     return (
         <div className="cart__related">
             <div className="columns columns--jcc columns--shrink columns--grow-40-bottom">

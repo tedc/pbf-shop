@@ -2,12 +2,11 @@ import Layout from "../../../src/components/Layout";
 import Seo from "../../../src/components/seo";
 import GET_COUNTRIES from "../../../src/queries/get-countries";
 import client from "../../../src/components/ApolloClient";
-import { GET_MENUS } from '../../../src/queries/get-menus';
 import Wrapper from '../../../src/components/area-clienti/Wrapper';
 import Tutorial from '../../../src/components/area-clienti/Tutorial';
-import { getSession } from 'next-auth/react';
 import { GET_TUTORIAL } from '../../../src/queries/users/get-tutorials';
-import { GET_CUSTOMER_GROUP } from '../../../src/queries/users/get-user';
+import getCustomerArea from '../../../lib/customer-area';
+import { getSession } from 'next-auth/react';
 export default function Ordine(props) {
     return (
         <Layout {...props}>
@@ -22,28 +21,15 @@ export default function Ordine(props) {
 export async function getServerSideProps ( context ) {
     const { params, req, res } = context || {};
     
-    const menus = await client.query({
-        query: GET_MENUS,
-    });
-
+    
     const session = await getSession(context);
     if( session === null ) {
         res.setHeader('Location', '/area-clienti');
         res.statusCode = 302;
     }
-    const children = await client.query( {
-        query : GET_CUSTOMER_GROUP,
-        variables: {
-            parent : session?.user?.databaseId
-        },
-        context: {
-            headers: {
-                'authorization' : session?.accessToken ? `Bearer ${session?.accessToken}`: '',
-            }
-        }
-    });
+    const data  = await getCustomerArea(session);
 
-    const { data } = await client.query( {
+    const { data : tutorial } = await client.query( {
         query : GET_TUTORIAL,
         variables: {
             id : params?.id
@@ -62,15 +48,15 @@ export async function getServerSideProps ( context ) {
     return {
         props: {
             seo : seo,
-            menus: menus?.data?.menus,
-            options: menus?.data?.optionsPage?.impostazioni,
+            menus: data?.menus,
+            options: data?.optionsPage?.impostazioni,
             isCheckout: false,
-            categories: menus?.data?.categories?.nodes ?? [],
+            categories: data?.categories?.nodes ?? [],
             session: session,
-            group: children?.data?.customers?.nodes ?? [],
+            group: data?.customers?.nodes ?? [],
             params: params,
-            tutorial: data?.tutorial,
-            user: children?.data?.customer,
+            tutorial: tutorial?.tutorial,
+            user: data?.customer,
         },
     }
 

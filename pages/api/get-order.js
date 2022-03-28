@@ -23,7 +23,6 @@ export default async function handler(req, res) {
         order: '',
     }
     const id = req?.query?.order_id;
-    console.log( `orders/${id}` )
     try {
         const {data} = await api.get(
             `orders/${id}`,
