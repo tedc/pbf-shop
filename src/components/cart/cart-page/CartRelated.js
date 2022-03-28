@@ -79,14 +79,13 @@ export default function CartRelated(props) {
     }, [ tab ] );
 
     return (
-        <>
-        { !isEmpty( related ) && <div className="cart__related">
-            <div className="columns columns--jcc columns--shrink columns--grow-40-bottom">
+        <div className="cart__related">
+            { !isEmpty(related) && <div className="columns columns--jcc columns--shrink columns--grow-40-bottom">
                 <div className="column column--nav column--s10-lg">
                 { !isEmpty( categories ) && ( <button className={cx('button', 'button--rounded', { 'button--bg-black' : tab === 'categories'})} onClick={(event)=> setTab('categories')}>Suggeriti</button> ) }
                 { !isEmpty( kits ) && ( <button className={cx('button', 'button--rounded', { 'button--bg-black' : tab === 'kits'})} onClick={(event)=> setTab('kits')}>Kit di lavorazione</button> ) }
                 </div>
-            </div>
+            </div> }
             <Swiper
                 slidesPerView={slides}
                 breakpoints={breakpoints}
@@ -107,7 +106,7 @@ export default function CartRelated(props) {
                     // swiper.params.navigation.prevEl = prev;
                     // swiper.params.navigation.nextEl = next;
                     //swiper.navigation.init()    
-                    if(!swiper.isLocked) {
+                    if(!swiper.isLocked ) {
                         swiper.navigation.prevEl.classList.remove('swiper-button-lock');
                         swiper.navigation.nextEl.classList.remove('swiper-button-lock');
                     }
@@ -130,7 +129,6 @@ export default function CartRelated(props) {
                     </div>
                 </nav>
             </div>
-        </div> }
-        </>
+        </div>
     )
 }
