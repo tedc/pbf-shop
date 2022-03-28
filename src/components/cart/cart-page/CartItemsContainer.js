@@ -28,6 +28,7 @@ const CartItemsContainer = (props) => {
 	// @TODO wil use it in future variations of the project.
 	const { miniCart, cart, setCart, setMiniCart } = useContext( AppContext );
 	const [requestError, setRequestError] = useState( null );
+    const [ couponProcessing, setCouponProcessing] = useState( false );
 
 	// Get Cart Data.
 	const { loading, error, data, refetch } = useQuery( GET_CART, {
@@ -142,7 +143,7 @@ const CartItemsContainer = (props) => {
     }
 	return (
         <>
-            { currentCart && <div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing || loading})}>
+            { currentCart && <div className={cx('cart', {'cart--loading': updateCartProcessing || clearCartProcessing || loading || couponProcessing})}>
                 <div className="columns columns--grow-140-bottom columns--jcc columns--shrink">
                     <div className="column column--s10-lg">
                     <div className="header">
@@ -180,7 +181,7 @@ const CartItemsContainer = (props) => {
 
                         {/*Cart Total*/ }
                         <div className="column column--s4-md column--s3-lg">
-                            <FormCoupon cart={currentCart} setRequestError={setRequestError} refetch={refetch} />
+                            <FormCoupon cart={currentCart} setRequestError={setRequestError} refetch={refetch} setCouponProcessing={setCouponProcessing} />
                             <div className="cart__summary">
                                 <h4 className="title title--font-size-14 title--font-family-secondary title--normal title---grow-30-bottom">
                                     Riepilogo ordine
@@ -209,7 +210,7 @@ const CartItemsContainer = (props) => {
                         </div>
 
                     {/* Display Errors if any */}
-                    { requestError ? <div className="row woo-next-cart-total-container mt-5"> { requestError } </div> : '' }
+                    { requestError ? <div className="column column--grow-30-top"><div className="message message--error"> { requestError } </div></div> : '' }
                     </div>
                     </div>
                 </div>
@@ -221,7 +222,7 @@ const CartItemsContainer = (props) => {
                 <CartEmpty />
             </div>
             </CSSTransition> 
-            { (updateCartProcessing || clearCartProcessing || loading) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
+            { (updateCartProcessing || clearCartProcessing || loading || couponProcessing) && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} /> }
             <style jsx>{
                 `.fade-in-enter {
                     opacity: 0;

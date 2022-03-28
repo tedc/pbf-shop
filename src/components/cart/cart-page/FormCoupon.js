@@ -5,30 +5,34 @@ import Title from '../../commons/Title';
 import { APPLY_COUPON, REMOVE_COUPONS } from "../../../mutations/apply-coupon";
 import { v4 } from 'uuid';
 
-export default function FormCoupon({cart, refetch, setRequestError}) {
+export default function FormCoupon({cart, refetch, setRequestError, setCouponProcessing}) {
     const inputRef = useRef();
     
     const [applyCoupon, { data: applyCouponRes, loading: applyCouponProcessing, error: applyCouponError }] = useMutation( APPLY_COUPON, {
         onCompleted: () => {
             refetch();
+            setCouponProcessing( false );
         },
         onError: ( error ) => {
             if ( error ) {
                 const errorMessage = ! isEmpty(error?.graphQLErrors?.[ 0 ]) ? error.graphQLErrors[ 0 ]?.message : '';
                 setRequestError( errorMessage );
             }
+            setCouponProcessing( false );
         }
     } );
 
     const [removeCoupon, { data: removeCouponRes, loading: removeCouponProcessing, error: removeCouponError }] = useMutation( REMOVE_COUPONS, {
         onCompleted: () => {
             refetch();
+            setCouponProcessing( false );
         },
         onError: ( error ) => {
             if ( error ) {
                 const errorMessage = ! isEmpty(error?.graphQLErrors?.[ 0 ]) ? error.graphQLErrors[ 0 ]?.message : '';
                 setRequestError( errorMessage );
             }
+            setCouponProcessing( false );
         }
     } );
     
@@ -40,7 +44,8 @@ export default function FormCoupon({cart, refetch, setRequestError}) {
         if ( applyCouponProcessing ) {
             return;
         }
-
+        setRequestError( null );
+        setCouponProcessing( true );
         const coupon = target.current.value;
 
         if(isUndefined(coupon) || isNull( coupon) || isEmpty(coupon)) {
@@ -64,6 +69,11 @@ export default function FormCoupon({cart, refetch, setRequestError}) {
         if ( removeCouponProcessing ) {
             return;
         }
+
+        setRequestError( null );
+
+
+        setCouponProcessing( true );
 
         const coupon = code;
 
