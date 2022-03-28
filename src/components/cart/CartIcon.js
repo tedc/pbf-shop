@@ -20,9 +20,10 @@ const CartIcon = () => {
     const {data: session, status } = useSession();
     const cartStorage = process?.browser ? window.localStorage.getItem( 'woo-next-cart' ) : null;
     const router = useRouter();
+
+    const [ productsCount, setProductsCount ] = useState( '');
+    const [ totalPrice, setTotalPrice ] = useState('');
     
-    const productsCount = ( null !== miniCart && Object.keys( miniCart ).length ) ? miniCart.totalProductsCount : '';
-	const totalPrice = ( null !== miniCart && Object.keys( miniCart ).length ) ? miniCart.totalProductsPrice : '';
     const openCart = (event)=> {
         const matchMin = window.matchMedia(`(min-width:48em)`);
         if(matchMin.matches) {
@@ -144,6 +145,8 @@ const CartIcon = () => {
     useEffect(()=> {
         const newCart = JSON.parse(cartStorage);
         setMiniCart( newCart );
+        setProductsCount(( null !== newCart && Object.keys( newCart ).length ) ? newCart.totalProductsCount : '');
+        setTotalPrice(( null !== newCart && Object.keys( newCart ).length ) ? newCart.totalProductsPrice : '');
         setCartLoading( false );
     }, [ cartStorage, status ])
 
