@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { useState, useContext } from 'react';
+import { useState, useContext, useEffect } from 'react';
 import { isEmpty, isNull } from 'lodash';
 import validateAndSanitizeLoginForm from '../../validator/login';
 import { signIn } from "next-auth/react";
@@ -81,6 +81,11 @@ export default function Login(props) {
     };
 
     const { username, password } = loginFields;
+
+    useEffect(()=> {
+        router.events.on('routeChangeStart', () => setShowLogin(false));
+    })
+
     return (
         <form className={cx('form', 'form--login', { 'form--login-loading': loading})} noValidate onSubmit={onFormSubmit}>
             <div className="form__close" onClick={()=> setShowLogin(!showLogin)}></div>

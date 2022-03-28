@@ -140,6 +140,7 @@ const Nav = (props) => {
             },
         });
         setSession( currentSession );
+        router.events.on('routeChangeStart', () => setIsBannerMenuVisible(false));
         return ()=> {
             if( !isNull( scrollTrigger ) ) scrollTrigger.kill()
         }

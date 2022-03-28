@@ -52,8 +52,10 @@ export async function getServerSideProps ( context ) {
     
     const session = await getSession(context);
     if( session === null ) {
-        res.setHeader('Location', '/area-clienti');
-        res.statusCode = 302;
+        if( !params?.all.indexOf( 'lost-password' ) && !params?.all.indexOf( 'reset-password' ) ) {
+            res.setHeader('Location', '/area-clienti');
+            res.statusCode = 302;
+        }     
     }
 
     const data = await getCustomerArea(session);

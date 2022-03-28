@@ -79,6 +79,7 @@ export default function CartRelated(props) {
     }, [ tab ] );
 
     return (
+        <>
         { !isEmpty( related ) && <div className="cart__related">
             <div className="columns columns--jcc columns--shrink columns--grow-40-bottom">
                 <div className="column column--nav column--s10-lg">
@@ -129,6 +130,7 @@ export default function CartRelated(props) {
                     </div>
                 </nav>
             </div>
-        </div> }}
+        </div> }
+        </>
     )
 }
