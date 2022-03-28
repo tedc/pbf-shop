@@ -25,7 +25,7 @@ export async function getServerSideProps ( context ) {
         res.statusCode = 302;
     }
    
-    const data = await getCustomerArea(session):
+    const data = await getCustomerArea(session);
 
     const seo = {
         title: 'Area clienti | Professional By Fama',
