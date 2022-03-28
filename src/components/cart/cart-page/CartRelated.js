@@ -1,4 +1,4 @@
-import { isEmpty, isNull, isUndefined } from 'lodash';
+import { isEmpty } from 'lodash';
 import { Navigation, Virtual} from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import ProductItem from '../../product/ProductItem';
@@ -79,7 +79,7 @@ export default function CartRelated(props) {
     }, [ tab ] );
 
     return (
-        <div className="cart__related">
+        { !isEmpty( related ) && <div className="cart__related">
             <div className="columns columns--jcc columns--shrink columns--grow-40-bottom">
                 <div className="column column--nav column--s10-lg">
                 { !isEmpty( categories ) && ( <button className={cx('button', 'button--rounded', { 'button--bg-black' : tab === 'categories'})} onClick={(event)=> setTab('categories')}>Suggeriti</button> ) }
@@ -129,6 +129,6 @@ export default function CartRelated(props) {
                     </div>
                 </nav>
             </div>
-        </div>
+        </div> }}
     )
 }
