@@ -38,6 +38,9 @@ const CreditCard = (props)=> {
             ...cardFilled,
             [key] : event?.complete
         })
+        return ()=> {
+
+        }
     }
     return (
         <>
@@ -161,6 +164,10 @@ const PaymentModes = ( { input, handleOnChange, gateways, CardNumberElement, Car
                     })
                 }
             }
+        }
+        return ()=> {
+            setCurrent( current );
+            setItems( gateways );
         }
     }, [ paymentMethod, status ] );
 

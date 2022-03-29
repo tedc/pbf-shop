@@ -156,7 +156,6 @@ const CheckoutFormLocal = ({countriesData, gateways, stripe, elements}) => {
 
         const createdOrderData = await handleSimpleCheckout(input, miniCart?.products, setRequestError, setIsSimpleOrderProcessing, setCreatedOrderData, session);
         const checkOutData = createCheckoutData(input);
-        console.log( createdOrderData );
        
         setRequestError(null);
         setOrderData(checkOutData);
@@ -293,7 +292,7 @@ const CheckoutFormLocal = ({countriesData, gateways, stripe, elements}) => {
 
     // Loading state
     const isOrderProcessing = isStripeOrderProcessing || isSimpleOrderProcessing || status === 'loading' || isUserFetching;
-    
+    console.log( status, isStripeOrderProcessing, isSimpleOrderProcessing, isUserFetching)
     return (
         <>  
             { miniCart ? (
@@ -399,7 +398,7 @@ const CheckoutFormLocal = ({countriesData, gateways, stripe, elements}) => {
                                 </div>
                             </div>
                             {/* Checkout Loading*/}
-                            {isOrderProcessing && <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px'}} />}
+                            {isOrderProcessing && <SpinnerDotted style={{ color: 'black', zIndex: 10, position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px'}} />}
                             {requestError && <p>Error : {requestError} :( Please try again</p>}
                         </form>
                     </div>
