@@ -1,4 +1,5 @@
 import { v4 as uuidv4 } from 'uuid';
+import { isUndefined } from 'lodash';
 /**
  * Clear the cart.
  *
@@ -58,4 +59,33 @@ export const stringifyPrice = price => {
         newPrice = newPrice[1] === '00' ? newPrice[0] : `${newPrice[0]},${newPrice[1]}`;
     }
     return newPrice
+}
+
+export const calculateShipping = (data, total) => {
+    const { methods } = data;
+    if (methods.length === 1) {
+        const title = methods[0].method_title;
+        const cost = parseFloat( methods[0]?.settings?.cost?.value );
+        return {
+            title, cost
+        }
+    } else {
+        let current = {};
+        methods.map((method)=> {
+            if( !isUndefined( method?.settings?.requires) ) {
+                const requires = method?.settings?.requires?.value;
+                const requirement = method?.settings[requires]?.value;
+                if( total >= parseFloat(requirement) ) {
+                    const cost = method?.method_id === 'free_shipping' ? 0 : parseFloat( methods[0]?.settings?.cost?.value );
+                    current = {
+                        title: method?.method_title,
+                        cost
+                    }
+                }
+            } else {
+                current = { title: method?.method_title, cost: parseFloat( method?.settings?.cost?.value ) };
+            }
+        });
+        return current;
+    }
 }

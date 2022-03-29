@@ -4,7 +4,7 @@ import { createCheckoutSession } from 'next-stripe/client' // @see https://githu
 import { loadStripe } from "@stripe/stripe-js";
 
 import GET_STATES from "../queries/get-states";
-import {createTheOrder, getCreateOrderData} from "./order";
+import {createTheOrder, getCreateOrderData, createTheGraphOrder, getCreateGraphOrderData} from "./order";
 import {clearTheCart} from "./cart";
 
 import axios from 'axios';
@@ -39,7 +39,6 @@ export const setStatesForCountry = async ( target, setTheStates, setIsFetchingSt
         setIsFetchingStates(true);
         //const countryCode = target[target.selectedIndex].getAttribute('data-countrycode')
         const countryCode = target.value;
-        console.log( countryCode )
         const states = await getStates( countryCode );
         setTheStates( states || [] );
         setIsFetchingStates(false);
@@ -78,21 +77,21 @@ export const handleTerms = ( input, setInput, target ) => {
  * @param setIsStripeOrderProcessing
  *
  */
-export const handleStripeCheckout = async (input, products, setRequestError, clearCartMutation, setIsStripeOrderProcessing, setCreatedOrderData) => {
+export const handleStripeCheckout = async (input, products, setRequestError, setIsStripeOrderProcessing, setCreatedOrderData, session) => {
     setIsStripeOrderProcessing(true);
-    const orderData = getCreateOrderData( input, products );
+    const orderData = getCreateGraphOrderData(input, products );
     orderData.set_paid = true;
 
     // On success show stripe form.
     try {
         const session = await createCheckoutSessionAndRedirect( products, input );
-        const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
+        const createCustomerOrder = await createTheGraphOrder(orderData, setRequestError,  '', session );
         setCreatedOrderData(createCustomerOrder);
 
-        const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
+        //const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
         setIsStripeOrderProcessing(false);
 
-        if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
+        if ( isEmpty( createCustomerOrder?.orderId ) ) {
             setRequestError('Clear cart failed')
             return null;
         }
@@ -114,13 +113,13 @@ export const handleStripeCheckout = async (input, products, setRequestError, cle
     return createCustomerOrder;
 }
 
-export const handlePayPalCheckout = async (input, products, setRequestError, clearCartMutation, setIsPaypalOrderProcessing, setCreatedOrderData) => {
+export const handlePayPalCheckout = async (input, products, setRequestError, setIsPaypalOrderProcessing, setCreatedOrderData, session) => {
     setIsPaypalOrderProcessing(true);
-    const orderData = getCreateOrderData( input, products );
-    const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
-    const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
+    const orderData = getCreateGraphOrderData(input, products );
+    const createCustomerOrder = await createTheGraphOrder(orderData, setRequestError,  '', session);
+    //const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
 
-    if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
+    if ( isEmpty( createCustomerOrder?.orderId ) ) {
         console.log( 'came in' );
         setRequestError('Clear cart failed');
         setIsPaypalOrderProcessing(false);
@@ -134,14 +133,14 @@ export const handlePayPalCheckout = async (input, products, setRequestError, cle
     return data;
 }
 
-export const handleSimpleCheckout = async (input, products, setRequestError, clearCartMutation, setIsSimpleOrderProcessing, setCreatedOrderData) => {
+export const handleSimpleCheckout = async (input, products, setRequestError, setIsSimpleOrderProcessing, setCreatedOrderData, session) => {
     setIsSimpleOrderProcessing(true);
     try {
-        const orderData = getCreateOrderData( input, products );
-        const createCustomerOrder = await createTheOrder( orderData, setRequestError,  '' );
-        const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
+        const orderData = getCreateGraphOrderData(input, products );
+        const createCustomerOrder = await createTheGraphOrder(orderData, setRequestError,  '', session);
+        //const cartCleared = await clearTheCart( clearCartMutation, createCustomerOrder?.error );
         setIsSimpleOrderProcessing(false);
-        if ( isEmpty( createCustomerOrder?.orderId ) || cartCleared?.error ) {
+        if ( createCustomerOrder?.orderId === '' ) {
             setRequestError('Clear cart failed')
             return null;
         }

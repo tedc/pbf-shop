@@ -1,5 +1,7 @@
 import {isArray, isEmpty} from "lodash";
-import axios from 'axios';
+import axios from 'axios';import client from "../components/ApolloClient";
+import CREATE_ORDER from '../mutations/create-order';
+import { v4 } from 'uuid';
 
 /**
  * Get line items for stripe
@@ -45,6 +47,24 @@ export const getCreateOrderLineItems = (products) => {
             return {
                 quantity,
                 product_id: productId,
+                // variation_id: '', // @TODO to be added.
+            };
+        },
+    );
+}
+
+
+export const getCreateGraphOrderLineItems = (products) => {
+
+    if (isEmpty(products) || !isArray( products )) {
+        return []
+    }
+
+    return products?.map(
+        ({productId, qty: quantity}) => {
+            return {
+                quantity,
+                productId,
                 // variation_id: '', // @TODO to be added.
             };
         },
@@ -99,6 +119,51 @@ export const getCreateOrderData = (order, products) => {
 
 
 
+export const getCreateGraphOrderData = (order, products)=> {
+    const shippingData = order.shippingDifferentThanShipping ? order.shipping : order.billing;
+    const coupons = [];
+    if( order?.discountAmount ) {
+        order?.discountAmount.map((c)=> {
+            coupons.push(c?.code);
+        })
+    }
+    console.log( order );
+    return {
+        shipping: {
+            firstName: shippingData?.firstName,
+            lastName: shippingData?.lastName,
+            address1: shippingData?.address1,
+            address2: shippingData?.address2,
+            city: shippingData?.city,
+            country: shippingData?.country,
+            state: shippingData?.state,
+            postcode: shippingData?.postcode,
+            email: shippingData?.email,
+            phone: shippingData?.phone,
+            company: shippingData?.company,
+        },
+        billing: {
+            firstName: order?.billing?.firstName,
+            lastName: order?.billing?.lastName,
+            address1: order?.billing?.address1,
+            address2: order?.billing?.address2,
+            city: order?.billing?.city,
+            country: order?.billing?.country,
+            state: order?.billing?.state,
+            postcode: order?.billing?.postcode,
+            email: order?.billing?.email,
+            phone: order?.billing?.phone,
+            company: order?.billing?.company,
+            vat: order?.billing?.vat
+        },
+        paymentMethod: order?.paymentMethod,
+        lineItems: getCreateGraphOrderLineItems( products ),
+        isPaid : order?.set_paid ?? false,
+        coupons
+    }
+}
+
+
 /**
  * Create order.
  *
@@ -151,6 +216,48 @@ export const createTheOrder = async ( orderData, setOrderFailedError, previousRe
            
     }
 
+    return response;
+}
+
+export const createTheGraphOrder = async (orderData, setOrderFailedError, previousRequestError, session )=> {
+    let response = {
+        orderId: null,
+        total: '',
+        currency: 'eur',
+        error: ''
+    };
+
+    // Don't proceed if previous request has error.
+    if ( previousRequestError ) {
+        response.error = previousRequestError;
+        return response;
+    }
+
+    setOrderFailedError( '' );
+    try {
+        const { data } = await client.mutate( {
+            mutation: CREATE_ORDER,
+            variables: {
+                input: {
+                    clientMutationId: v4(), // Generate a unique id
+                    ...orderData
+                },
+            },
+            context: {
+                headers: {
+                    'authorization' : session?.accessToken ? `Bearer ${session?.accessToken}`: '',
+                }
+            },
+        } );
+        response.orderId = data?.createOrder?.orderId ?? '';
+        response.total = data?.createOrder?.order?.total ?? '';
+        response.currency = data?.createOrder?.order?.currency ?? '';
+        response.status = data?.createOrder?.order?.status ? status( data?.createOrder?.order?.status ) : 'pending';
+
+    } catch( error ) {
+        console.log(error);
+        console.warn( 'Handle create order error', error?.message );
+    }
     return response;
 }
 

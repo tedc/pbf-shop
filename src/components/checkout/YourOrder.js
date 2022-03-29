@@ -1,6 +1,7 @@
 import { Fragment } from 'react';
 import CheckoutCartItem from "./CheckoutCartItem";
 import { isEmpty, isNull, isUndefined } from 'lodash';
+import { stringifyPrice } from '../../utils/cart';
 
 const YourOrder = ( { cart } ) => {
 
@@ -19,18 +20,18 @@ const YourOrder = ( { cart } ) => {
                     ) }
 					<div className="checkout__row">
                         SubTotale
-                        <span>{ ( 'string' !== typeof cart?.subtotal ) ? cart?.subtotal.toFixed(2) : cart?.subtotal }</span>
+                        <span>{ ( 'string' !== typeof cart?.subtotal ) ? stringifyPrice( cart?.subtotal.toFixed(2) ) : cart?.subtotal }</span>
                     </div>
                     <div className="checkout__row">
                         Spedizione
                         { !isNull(cart?.shippingTotal) && !isEmpty(cart?.shippingTotal) && !isUndefined(cart?.shippingTotal) && parseInt(cart?.shippingTotal) > 0 ? (
-                            <span>{ ( 'string' !== typeof cart?.shippingTotal ) ? cart?.shippingTotal.toFixed(2) : cart?.shippingTotal }</span>
+                            <span>{ ( 'string' !== typeof cart?.shippingTotal ) ? stringifyPrice( cart?.shippingTotal.toFixed(2) ) : cart?.shippingTotal }</span>
                         ) : (<span>Gratuita</span>)}
                     </div>
                         {/* <h2 className="text-2xl">Cart Total</h2> */}
                     <div className="checkout__total">
                         Totale (iva inc.)
-                        <strong>{ ( 'string' !== typeof cart.totalProductsPrice ) ? cart.totalProductsPrice.toFixed(2) : cart.totalProductsPrice }</strong>
+                        <strong>{ ( 'string' !== typeof cart.totalProductsPrice ) ? stringifyPrice( cart.totalProductsPrice.toFixed(2) ) : cart.totalProductsPrice }</strong>
                     </div>
 				</Fragment>
 			) : '' }

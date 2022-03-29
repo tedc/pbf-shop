@@ -1,5 +1,5 @@
 import { v4 } from 'uuid';
-import {isEmpty, isArray} from 'lodash';
+import {isEmpty, isArray, isNull, difference } from 'lodash';
 
 /**
  * Extracts and returns float value from a string.
@@ -27,6 +27,7 @@ export const addFirstProduct = ( product, qty ) => {
 	let newCart = {
 		products: [],
 		totalProductsCount: 1,
+        subtotal: productPrice,
 		totalProductsPrice: productPrice
 	};
 
@@ -56,6 +57,9 @@ export const createNewProduct = ( product, productPrice, qty ) => {
         slug: product.slug,
         kits: product?.kits?.nodes,
         categories: product?.productCategories?.nodes,
+        productCategoriesIds: product?.productCategoriesIds,
+        hideOnB2c: product?.details?.hideOnB2c,
+        wholesalerProduct: product?.details?.wholesalerProduct,
 		qty,
         userVisibility: product?.userVisibility,
 		totalPrice: parseFloat( ( productPrice * qty ).toFixed( 2 ) )
@@ -88,6 +92,7 @@ export const updateCart = ( existingCart, product, qtyToBeAdded, newQty = false 
 
 	const updatedCart = {
 		products: updatedProducts,
+        subtotal: parseFloat( total.totalPrice ),
 		totalProductsCount: parseInt( total.qty ),
 		totalProductsPrice: parseFloat( total.totalPrice )
 	};
@@ -188,6 +193,7 @@ export const removeItemFromCart = ( productId ) => {
 		let updatedCart = existingCart;
 		updatedCart.products.splice( productExitsIndex, 1 );
 		updatedCart.totalProductsCount = updatedCart.totalProductsCount - qtyToBeRemovedFromTotal;
+        updatedCart.subtotal = updatedCart.totalProductsPrice - priceToBeDeductedFromTotal;
 		updatedCart.totalProductsPrice = updatedCart.totalProductsPrice - priceToBeDeductedFromTotal;
 
 		localStorage.setItem( 'woo-next-cart', JSON.stringify( updatedCart ) );
@@ -254,6 +260,7 @@ export const getFormattedCart = ( data ) => {
         product.userVisibility = givenProduct?.userVisibility;
         product.hideOnB2c = givenProduct?.details?.hideOnB2c;
         product.wholesalerProduct = givenProduct?.details?.wholesalerProduct;
+        product.productCategoriesIds = givenProduct?.productCategoriesIds;
 		totalProductsCount += givenProducts?.[ i ]?.quantity;
 
 		// Push each item into the products array.
@@ -261,7 +268,7 @@ export const getFormattedCart = ( data ) => {
 	}
     formattedCart.appliedCoupons = data?.cart?.appliedCoupons ?? [];
     formattedCart.subtotal = data?.cart?.subtotal ?? '';
-    formattedCart.shippingTotal = data?.cart?.shippingTotal ?? '';
+    formattedCart.shippingTotal = data?.cart?.shippingTotal ?? 0;
 	formattedCart.totalProductsCount = totalProductsCount;
 	formattedCart.totalProductsPrice = data?.cart?.total ?? '';
 
@@ -357,3 +364,257 @@ export const getUpdatedItems = ( products, newQty, cartKey ) => {
 	return updatedItems;
 
 };
+
+
+export const applyCoupon = (data, cart, setRequestError, setMiniCart, email = null) => {
+    const newCart = {...cart};
+    const {
+        date_expires,
+        usage_count,
+        limit_usage_to_x_items,
+        product_ids,
+        excluded_product_ids,
+        free_shipping,
+        product_categories,
+        excluded_product_categories,
+        exclude_sale_items,
+        minimum_amount,
+        maximoum_amount,
+        email_restrictions,
+        used_by,
+        amount,
+        code,
+        id,
+        discount_type,
+        maximum_amount,
+        usage_limit,
+        usage_limit_per_user,
+        individual_use
+    } = data;
+    let errorMessage = null;
+    let totalDiscount = 0;
+    if( cart?.totalProductsPrice < minimum_amount ) {
+        errorMessage = `Non hai raggiunto la cifra minima di €${minimum_amount} necessaria per usare il buono sconto "${code}"`;
+    }
+    if( parseFloat(maximum_amount) > 0 ) {
+        if( cart?.totalProductsPrice > maximum_amount ) {
+            errorMessage = `Hai superato la cifra massima di €${maximum_amount} necessaria per usare il buono sconto "${code}"`;
+        }
+    } 
+    if( !isNull( date_expires ) ) {
+        const date = new Date().getTime();
+        const expire = new Date(date_expires).getTime();
+        const isExpired = date > expire;
+        if( isExpired ) {
+            errorMessage = `Buono sconto "${code}" non più`;
+        }
+    }
+    if( !isNull(usage_limit) ) {
+        if ( usage_count >= usage_limit ) {
+            errorMessage = `Il buono sconto "${code}" non può essere più utilizzato`;
+        }
+    }
+    if( !isNull( usage_limit_per_user ) ) {
+        if( !isNull( email ) ) {
+            const array = [...used_by];
+            const occurence = array.filter((i)=> i === email).length;
+            if( occurence >= usage_limit_per_user) {
+                errorMessage = `Hai raggiunto il limite di utilizzo personale per il buono sconto "${code}"`;
+            }
+            
+        } else {
+            errorMessage = `Per utilizzare il buono "${code}" devi accedere al sito o compilare prima i dati di fatturazione`;
+        }
+    }
+    if( !isEmpty( email_restrictions )) {
+        if( !isNull( email) ) {
+            if( email_restrictions.indexOf(email) === -1 ) {
+                errorMessage = `Non puoi utilizzare il buono sconto "${code}"`;
+            }
+        } else {
+            errorMessage = `Per utilizzare il buono "${code}" devi accedere al sito o compilare prima i dati di fatturazione`;
+        }
+    }
+    if( individual_use ) {
+        if( !isNull(cart?.appliedCoupons) && !isEmpty(cart?.appliedCoupons) ) {
+            errorMessage = `Il buono "${code}" non può essere utilizzato in combinazione con altri codici sconto`;
+        }
+    }
+    if( exclude_sale_items ) {
+        if( discount_type === 'fixed_price') {
+            let valid = true;
+            cart?.products.map((product)=> {
+                if( product.onSale ) {
+                    valid = false;
+                }
+            });
+            if( !valid ) {
+                errorMessage = `Il buono "${code}" non può essere utilizzato se stai acquistando prodotti in offerta`;
+            }
+        } else {
+            cart?.products.map((product)=> {
+                totalDiscount += product?.totalPrice;
+            });
+        }
+    }
+
+    if( !isEmpty(product_ids) ) {
+        if( discount_type === 'fixed_price') {
+            let valid = true;
+            cart?.products.map((product)=> {
+                if( product_ids.indexOf( product?.databaseId ) === -1 ) {
+                    valid = false;
+                }
+            });
+            if( !valid ) {
+                errorMessage = `Il buono "${code}" non può essere utilizzato.`;
+            }
+        } else  {
+            cart?.products.map((product)=> {
+                if( product_ids.indexOf( product?.databaseId ) === -1 ) {
+                    totalDiscount -= discount_type === 'percent' ? ( product?.totalPrice * ( parseFloat( amount ) / 100 ) ) : ( product?.totalPrice - parseFloat(amount) );
+                }
+            });
+        }
+    }
+
+    if( !isEmpty(product_categories) ) {
+        const array = [...product_categories];
+        const length = product_categories.length;
+        if( discount_type === 'fixed_price') {
+            let valid = true;
+            cart?.products.map((product)=> {
+                const d = difference(array, product?.productCategoriesIds);
+                if( d === length ) {
+                    valid = false;
+                }
+            });
+            if( !valid ) {
+                errorMessage = `Il buono "${code}" non può essere utilizzato.`;
+            }
+        } else  {
+            cart?.products.map((product)=> {
+                const d = difference(array, product?.productCategoriesIds);
+                if( d === length ) {
+                    totalDiscount -= discount_type === 'percent' ? ( product?.totalPrice * ( parseFloat( amount ) / 100 ) ) : ( product?.totalPrice - parseFloat(amount) );
+                }
+            });
+        }
+    }
+
+    if( !isEmpty(excluded_product_categories) ) {
+        const array = [...excluded_product_categories];
+        const length = excluded_product_categories.length;
+                
+        if( discount_type === 'fixed_price') {
+            let valid = true;
+            cart?.products.map((product)=> {
+                const d = difference(array, product?.productCategoriesIds);
+                if( d !== length ) {
+                    valid = false;
+                }
+            });
+            if( !valid ) {
+                errorMessage = `Il buono "${code}" non può essere utilizzato.`;
+            }
+        } else  {
+            cart?.products.map((product)=> {
+                const d = difference(array, product?.productCategoriesIds);
+                if( d !== length ) {
+                    totalDiscount += discount_type === 'percent' ? ( product?.totalPrice * ( parseFloat( amount ) / 100 ) ) : ( product?.totalPrice - parseFloat(amount) );
+                }
+            });
+        }
+    }
+    if( free_shipping ) {
+        newCart.shippingTotal = 0;
+    }
+    if( !isEmpty( errorMessage ) ) {
+        setRequestError( errorMessage );
+        if( newCart.appliedCoupons ) {
+            const index = findIndex( newCart?.appliedCoupons, (c)=> c?.id === id);
+            if( index ) {
+                newCart.appliedCoupons.splice(index, 1);
+            }
+            setMiniCart( newCart );
+        }
+        return false;
+    }
+
+    if( newCart.appliedCoupons ) {
+        newCart.appliedCoupons.push({id, discountAmount: amount, code});
+    } else {
+        newCart.appliedCoupons = [{id, discountAmount: amount, code}];
+    }
+    
+    if( totalDiscount < 0 ) {
+        newCart.totalProductsPrice += totalDiscount;
+        setMiniCart( newCart );
+    } else {
+        if (totalDiscount > 0) {
+            newCart?.totalProductsPrice -= discount_type === 'percent' ? cart?.totalProductsPrice * ( parseFloat(amount) / 100 ) : parseFloat( amount );
+        }
+        setMiniCart( newCart );
+    }
+}
+
+export const removeCoupon = (code, cart, setMiniCart)=> {
+    const newCart = {...cart};
+    if( newCart.appliedCoupons ) {
+        let i,
+            amount
+        newCart.appliedCoupons.map((c, index)=> {
+            if( c?.code === code) {
+                i = index;
+                amount += parseFloat(c?.amount);
+            }
+        });
+        if( !isUndefined(i) ) {
+            newCart.appliedCoupons.splice(i, 1);
+        }
+        newCart.totalProductsPrice += amount;
+    }
+    setMiniCart( newCart );
+}
+
+export const cleanCart = (cart, status, session)=> {
+        if( isNull(cart) ) return;
+        if( status === 'loading') return;
+        const { products } = cart;
+        if( status === 'authenticated' ) {
+            let role;
+            session?.user?.roles?.nodes.map((r) => {
+                role = r?.name !== 'customer' ? r?.name : null;
+            });
+            if( role !== 'customer') {
+                products?.map((product)=> {
+                    if( product?.userVisibility ) {
+                        let visible = false;
+                        product?.userVisibility.map((uItem)=> {
+                            if( uItem?.id === session?.user?.databaseId || uItem?.key == role) {
+                                visible = true;
+                            }
+                        });
+                        if( !visible ) {
+                            removeItemFromCart(product?.databaseId);
+                        }
+                    } else {
+                        removeItemFromCart(product?.databaseId);
+                    }
+                })
+            } else {
+                products?.map((product)=> {
+                    if( product?.wholesalerProduct || products?.hideOnB2c ) {
+                        removeItemFromCart(product?.databaseId);
+                    }
+                })
+            }
+            
+        } else {
+            products?.map((product)=> {
+                if( product?.wholesalerProduct || product?.hideOnB2c ) {
+                    removeItemFromCart(product?.databaseId);
+                }
+            })
+        }
+    }

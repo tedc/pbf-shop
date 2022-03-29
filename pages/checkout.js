@@ -1,5 +1,5 @@
 import Layout from "../src/components/Layout";
-import CheckoutForm from "../src/components/checkout/CheckoutForm";
+import CheckoutFormLocal from "../src/components/checkout/CheckoutFormLocal";
 import GET_COUNTRIES from "../src/queries/get-countries";
 import client from "../src/components/ApolloClient";
 import {PAGE_BY_URI} from '../src/queries/page/get-page';
@@ -44,7 +44,7 @@ const Checkout = (props) => (
                 <CheckoutBanner {...props?.options} />
                 <ElementsConsumer>
                 {({stripe, elements}) => (
-                    <CheckoutForm stripe={stripe} elements={elements} countriesData={props?.data?.wooCountries ?? {}} gateways={props?.gateways} />
+                    <CheckoutFormLocal stripe={stripe} elements={elements} countriesData={props?.data?.wooCountries ?? {}} gateways={props?.gateways} />
                 )}
                 </ElementsConsumer>
     		</div>

@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import CartIcon from "./cart/CartIcon";
+import CartIconLocal from "./cart/CartIconLocal";
 import { useRouter } from 'next/router';
 import { Logo, Account } from './icons'
 import { useState, useRef, useEffect, useContext } from 'react';
@@ -179,7 +180,7 @@ const Nav = (props) => {
                 ) : ''}
                 </>
                 <div className="banner__tools">
-                    <CartIcon/>
+                    <CartIconLocal/>
                     <div className={cx('banner__account')}>
                     <CSSTransition in={ status === 'unauthenticated' } timeout={500} classNames="account-loading" unmountOnExit>
                         <a href="#" onClick={(event)=> openLogin(event, '/area-clienti')} className="button button--rounded button--bg-black">

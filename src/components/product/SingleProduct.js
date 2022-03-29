@@ -1,5 +1,6 @@
 import { useRouter } from 'next/router';
 import AddToCartButton from '../cart/AddToCartButton';
+import AddToCartButtonLocal from '../cart/AddToCartButtonLocal';
 import {PRODUCT_BY_SLUG_QUERY} from '../../queries/products/get-product';
 import {GET_PRODUCTS} from '../../queries/products/get-products';
 import { isEmpty, isNull, isUndefined } from 'lodash';
@@ -214,7 +215,7 @@ export default function SingleProduct(props) {
                         <Tabs {...{tabs : {firstTab: product.details.firstTab, secondTab: product.details.secondTab, thirdTab: product.details.thirdTab}}} />
                         <div className="product__meta product__meta--grow-30">
                             <Price salesPrice={item?.price} regularPrice={item?.regularPrice}/>
-                            <AddToCartButton product={ item } input={true} />
+                            <AddToCartButtonLocal product={ item } input={true} />
                         </div>
                         
                     </div>
@@ -225,7 +226,7 @@ export default function SingleProduct(props) {
             <Related {...kitProps} />
             <div className="product__fixed">
                 <Price salesPrice={item?.price} regularPrice={item?.regularPrice}/>
-                <AddToCartButton product={ item } input={false} />
+                <AddToCartButtonLocal product={ item } input={false} />
             </div>
             <CSSTransition in={ isLoading }  timeout={750} classNames="fade-in" unmountOnExit>
                 <SpinnerDotted style={{ color: 'black', position: 'fixed', top: '50%', left: '50%', margin: '-25px 0 0 -25px', zIndex: 3}} />

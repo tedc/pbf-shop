@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { stringifyPrice } from '../../utils/cart';
 const CheckoutCartItem = ( { item } ) => {
 
 	return (
@@ -11,7 +12,7 @@ const CheckoutCartItem = ( { item } ) => {
                 }}>
 			<a>{ item.name } x{item.qty}</a>
             </Link>
-			<div>{ item.totalPrice }</div>
+			<div>{ item?.totalPrice }</div>
 		</div>
 	)
 };

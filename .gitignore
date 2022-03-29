@@ -9,6 +9,7 @@ dist/
 .cache
 .next
 .env
+.env.development
 .now
 Listini (1).xlsx
 pbf-shop.sublime-project
