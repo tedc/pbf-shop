@@ -12,7 +12,7 @@ const CheckoutCartItem = ( { item } ) => {
                 }}>
 			<a>{ item.name } x{item.qty}</a>
             </Link>
-			<div>{ item?.totalPrice }</div>
+			<div>{ stringifyPrice( item?.totalPrice ) }</div>
 		</div>
 	)
 };

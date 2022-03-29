@@ -49,12 +49,13 @@ export const clearTheCart = async (clearCartMutation, previousRequestError) => {
 
 
 export const stringifyPrice = price => {
-    const number = price.split('.');
+    const number = price.toString().split('.');
     let newPrice = number[1] === '00' ? `€${number[0]}` : price;
     if(!/(€)/.test(newPrice)) {
-        newPrice = new new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(newPrice);
-        newPrice = newPrice.split(' ');
-        newPrice = `${newPrice[1]}${newPrice[0]}`;
+        newPrice = new Intl.NumberFormat('de-DE', { style: 'currency', currency: 'EUR' }).format(newPrice);
+        newPrice = newPrice.split('€');
+        newPrice = `€${newPrice[0].trim()}`;
+        
         newPrice = newPrice.split(',');
         newPrice = newPrice[1] === '00' ? newPrice[0] : `${newPrice[0]},${newPrice[1]}`;
     }
